@@ -74,9 +74,6 @@
 #include "vs1063_uc.h"
 #include "player.h"
 
-/*LCD module includes*/
-#include "lcd.h";
-
 //Reset P6.0
 //DREQ P6.5
 //CS P3.2
@@ -196,13 +193,17 @@ void put_rc (FRESULT rc)
     xprintf("rc=%u FR_%s\n", (UINT)rc, str);
 }
 
+unsigned char min(unsigned char x, unsigned char y){
+    if(x>y) return y;
+    else return x;
+}
 
 
 int main(void)
 {
 
     char *ptr, *ptr2;
-    unsigned int error_flag = 0;
+    signed int error_flag = 0;
     long p1, p2, p3;
     BYTE res, b, drv = 0;
     UINT s1, s2, cnt, blen = sizeof Buff;
@@ -212,6 +213,8 @@ int main(void)
   //  RTC rtc;
     FRESULT fres;
     int result_codec=0;
+    unsigned char i=0;
+    unsigned short reg[16];
 
     WDTCTL = WDTPW | WDTHOLD;                    // Stop watchdog timer to prevent the WDT from resetting the board. Not used now.
 
@@ -265,42 +268,88 @@ int main(void)
           //UCB2IE |= UCRXIE;
           //Configuring the CS GPIO pin
               P3->DIR |= BIT0;   //Sets P3.0 as an output pin
-              /*Turn on LCD Module*/
-                 lcdinit();
-              /*Show the menu on LCD screen*/
-                 lcdmenu();
-              /*Populate file list*/
-              //This is for populating music files
-              //lcdpopulatefiles(1);
-              //This is for populating text files
-              lcdpopulatefiles(2);
 
               if (VSTestInitHardware() || VSTestInitSoftware()) {
               //printf("Failed initializing VS10xx, exiting\n");
               //exit(EXIT_FAILURE);
                    error_flag = -1;
               }
+              EUSCI_B0->CTLW0 |= EUSCI_B_CTLW0_SWRST;
+              EUSCI_B0->BRW =100;
+              EUSCI_B0->CTLW0 &=~ EUSCI_B_CTLW0_SWRST;
+              reg[0]=ReadSci(SCI_MODE);
+              reg[1]=ReadSci(SCI_STATUS);
+              reg[2]=ReadSci(SCI_BASS);
+              reg[3]=ReadSci(SCI_CLOCKF);
+              reg[4]=ReadSci(SCI_DECODE_TIME);
+              reg[5]=ReadSci(SCI_AUDATA);
+              reg[6]=ReadSci(SCI_WRAM);
+              reg[7]=ReadSci(SCI_WRAMADDR);
+              reg[8]=ReadSci(SCI_HDAT0);
+              reg[9]=ReadSci(SCI_HDAT1);
+              reg[10]=ReadSci(SCI_AIADDR);
+              reg[11]=ReadSci(SCI_VOL);
+              reg[12]=ReadSci(SCI_AICTRL0);
+              reg[13]=ReadSci(SCI_AICTRL1);
+              reg[14]=ReadSci(SCI_AICTRL2);
+              reg[15]=ReadSci(SCI_AICTRL3);
+
+
+
+
+
 
           if(error_flag != -1){
-              EUSCI_B0->BRW = 1;
     //power_on();
               fres = f_mount(&FatFs, "", 1);
               fres = f_open(&File[0], my_path, FA_READ);
               fres = f_read(&File[0], Buff, 10, &s1);
               fres = f_close(&File[0]);
-
+             // WriteSci(SCI_VOL, 0x0101);
               WriteSci(SCI_DECODE_TIME, 0);         // Reset DECODE_TIME
-
-              fres = f_open(&File[1], "testmp3.mp3", FA_READ);
+              EUSCI_B0->IFG |= EUSCI_B_IFG_TXIFG;
+              fres = f_open(&File[1], "bird.wav", FA_READ);
               cnt = 0;
+              P6->OUT |= BIT4;
               while(1){
-                  fres = f_read(&File[1], Buff2,  32, &s2);
+                  fres = f_read(&File[1], Buff2,  128, &s2);
                   cnt = cnt + s2;
                   if(fres || s2 == 0) break;
-                  result_codec = WriteSdi(Buff2, s2);
+                  P3->OUT |= BIT2; //Activate CS - make it low
+                  //CS->KEY = CS_KEY_VAL;
+                  //CS->CTL1 &= 0x8FFFFFFF;
+                  //CS->CTL1 |= (CS_CTL1_SELS_3 | CS_CTL1_DIVS_1);
+                  //EUSCI_B0->CTLW0 |= EUSCI_B_CTLW0_SWRST;
+                  //EUSCI_B0->BRW =1;
+                  //EUSCI_B0->CTLW0 &=~ EUSCI_B_CTLW0_SWRST;
+                  //CS->KEY = 0;
+
+                  for(i=0; i<4; i++){
+                      result_codec = WriteSdi(Buff2+(i*32), min(32, s2));
+//                      reg[8]=ReadSci(SCI_HDAT0);
+//                      reg[9]=ReadSci(SCI_HDAT1);
+
+                  }
+                  while(!(EUSCI_B0->IFG & EUSCI_B_IFG_TXIFG)){};
+
+                  P3->OUT &=~ BIT2; //Activate CS - make it low
+                  reg[8]=ReadSci(SCI_HDAT0);
+                  reg[9]=ReadSci(SCI_HDAT1);
+
+                  //CS->KEY = CS_KEY_VAL;
+                  //CS->CTL1 &= 0x8FFFFFFF;
+                  //CS->CTL1 |= (CS_CTL1_SELS_3 | CS_CTL1_DIVS_1);
+                  //EUSCI_B2->CTLW0 |= EUSCI_B_CTLW0_SWRST;
+                  //EUSCI_B2->BRW =9;
+                  //EUSCI_B2->CTLW0 &=~ EUSCI_B_CTLW0_SWRST;
+                  //CS->KEY = 0;
+
 
               }
+
               fres = f_close(&File[1]);
+            //  P6->OUT |= BIT4;
+              WriteSci(SCI_MODE, SM_CANCEL);
           }
    while(1);
     return 0;

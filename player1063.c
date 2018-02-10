@@ -131,6 +131,23 @@ void spiinit(){
 
 }
 
+void WriteSpiByteSDI(u_int8 data){
+                   int i=0;
+
+//                  EUSCI_B0->IFG &=~ EUSCI_B_IFG_TXIFG;
+                  while(!(EUSCI_B0->IFG & EUSCI_B_IFG_TXIFG)){
+                      i++;
+                      if(i==100){
+                          break;
+                      }
+                  }
+                  EUSCI_B0->TXBUF = data;
+
+//                  EUSCI_B0->IFG &=~ EUSCI_B_IFG_TXIFG;
+
+}
+
+
 void WriteSpiByte(u_int8 data){
 
                   EUSCI_B0->IFG &=~ EUSCI_B_IFG_TXIFG;
@@ -166,7 +183,7 @@ u_int16 ReadSci(u_int8 addr){
 	while(P6->IN & BIT5 == 0); //Wait until DREQ is high
 	P3->OUT &= ~BIT2; //Activate CS - make it low
 	EUSCI_B0->IFG &=~ EUSCI_B_IFG_RXIFG;
-	WriteSpiByte(3); //Read Command Code
+	WriteSpiByte(0x03); //Read Command Code
 	WriteSpiByte(addr); //SCI Register number
 //	delay(10);
 	EUSCI_B0->TXBUF = 0xFF;
@@ -194,7 +211,7 @@ void WriteSci(u_int8 addr, u_int16 data){
 
 	while(P6->IN & BIT5 == 0); //Wait until DREQ is high
 	P3->OUT &= ~BIT2; //Activate CS - make it low
-	WriteSpiByte(2); //Write command code
+	WriteSpiByte(0x02); //Write command code
 	WriteSpiByte(addr); //SCI register number
 	WriteSpiByte((u_int8)(data >> 8));
 	WriteSpiByte((u_int8)(data & 0xFF));
@@ -211,11 +228,11 @@ int WriteSdi(const u_int8 *data, u_int8 bytes){
 		return -1;  //Error, too many bytes to transfer
 
 	while(P6->IN & BIT5 == 0); //Wait until DREQ is high
-	P3->OUT &= ~BIT2; //Activate CS - make it low
+	//P3->OUT &= ~BIT2; //Activate CS - make it low
 	for(i=0; i<bytes; i++){
-		WriteSpiByte(*data++);
+		WriteSpiByteSDI(*data++);
 	}
-	P3->OUT |= BIT2; //Deactivate CS - make it high
+//	P3->OUT |= BIT2; //Deactivate CS - make it high
 
 	return 0; //OK
 
@@ -733,6 +750,8 @@ void VS1063PlayFile(FILE *readFp) {
       WriteSdi(playBuf, 2);
   }
 
+
+
   /* That's it. Now we've played the file as we should, and left VS10xx
      in a stable state. It is now safe to call this function again for
      the next song, and again, and again... */
@@ -1002,7 +1021,7 @@ int VSTestInitHardware(void) {
   P3->DIR |= BIT2; //Makes CS (P3.2) as output
 //Pin 6.0 is connected to XRESET / RST -> When it is driven low that means we have reset the circuit.
   P6->DIR |= BIT0;   //makes RST (P6.0) as output
-  P6->DIR |= BIT4;   //makes RST (P6.0) as output
+  P6->DIR |= BIT4;   //makes XDCS (P6.4) as output
   P6->OUT &= ~BIT0;
   delay(100);
 
@@ -1037,7 +1056,7 @@ int VSTestInitSoftware(void) {
   /* Start initialization with a dummy read, which makes sure our
      microcontoller chips selects and everything are where they
      are supposed to be and that VS10xx's SCI bus is in a known state. */
-  P6->OUT |= BIT4;
+  //P6->OUT |= BIT4;
   ReadSci(SCI_MODE);
 
   /* First real operation is a software reset. After the software
@@ -1045,6 +1064,7 @@ int VSTestInitSoftware(void) {
      on your application, either set or not set SM_SDISHARE. See the
      Datasheet for details. */
   WriteSci(SCI_MODE, SM_SDINEW|SM_SDISHARE|SM_TESTS|SM_RESET);
+  //WriteSci(SCI_MODE, 0x0804);
   ReadSci(SCI_MODE);
 
   /* A quick sanity check: write to two registers, then test if we
@@ -1076,19 +1096,24 @@ int VSTestInitSoftware(void) {
   /* Set the clock. Until this point we need to run SPI slow so that
      we do not exceed the maximum speeds mentioned in
      Chapter SPI Timing Diagram in the Datasheet. */
+
   WriteSci(SCI_CLOCKF,
            HZ_TO_SC_FREQ(12288000) | SC_MULT_53_40X | SC_ADD_53_15X);
 
+//  WriteSci(SCI_CLOCKF, 0xa000);
 
   /* Now when we have upped the VS10xx clock speed, the microcontroller
      SPI bus can run faster. Do that before you start playing or
      recording files. */
 
   /* Set up other parameters. */
-  WriteVS10xxMem(PAR_CONFIG1, PAR_CONFIG1_AAC_SBR_SELECTIVE_UPSAMPLE);
+ WriteVS10xxMem(PAR_CONFIG1, PAR_CONFIG1_AAC_SBR_SELECTIVE_UPSAMPLE);
+  //WriteSci(SCI_WRAMADDR, 0xc013);
+
+
 
   /* Set volume level at -6 dB of maximum */
-  WriteSci(SCI_VOL, 0x0c0c);
+  WriteSci(SCI_VOL, 0x2424);
 
   /* Now it's time to load the proper patch set. */
   LoadPlugin(plugin, sizeof(plugin)/sizeof(plugin[0]));
