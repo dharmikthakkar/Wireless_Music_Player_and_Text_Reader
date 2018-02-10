@@ -3,16 +3,18 @@
 mmc_ssp.obj: ../mmc_ssp.c
 mmc_ssp.obj: C:/ti/msp/MSP432Ware_3_50_00_02/driverlib/driverlib/MSP432P4xx/driverlib.h
 mmc_ssp.obj: C:/ti/msp/MSP432Ware_3_50_00_02/driverlib/driverlib/MSP432P4xx/adc14.h
-mmc_ssp.obj: C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.2.LTS/include/stdint.h
-mmc_ssp.obj: C:/ti/ccsv7/ccs_base/arm/include/msp.h
-mmc_ssp.obj: C:/ti/ccsv7/ccs_base/arm/include/msp432p401r.h
-mmc_ssp.obj: C:/ti/ccsv7/ccs_base/arm/include/msp_compatibility.h
-mmc_ssp.obj: C:/ti/ccsv7/ccs_base/arm/include/CMSIS/cmsis_ccs.h
-mmc_ssp.obj: C:/ti/ccsv7/ccs_base/arm/include/msp432p401r_classic.h
-mmc_ssp.obj: C:/ti/ccsv7/ccs_base/arm/include/CMSIS/core_cm4.h
-mmc_ssp.obj: C:/ti/ccsv7/ccs_base/arm/include/CMSIS/cmsis_compiler.h
-mmc_ssp.obj: C:/ti/ccsv7/ccs_base/arm/include/system_msp432p401r.h
-mmc_ssp.obj: C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.2.LTS/include/stdbool.h
+mmc_ssp.obj: C:/ti/ccsv6/tools/compiler/ti-cgt-arm_16.9.3.LTS/include/stdint.h
+mmc_ssp.obj: C:/ti/ccsv6/ccs_base/arm/include/msp.h
+mmc_ssp.obj: C:/ti/ccsv6/ccs_base/arm/include/msp432p401r.h
+mmc_ssp.obj: C:/ti/ccsv6/ccs_base/arm/include/msp_compatibility.h
+mmc_ssp.obj: C:/ti/ccsv6/ccs_base/arm/include/CMSIS/cmsis_ccs.h
+mmc_ssp.obj: C:/ti/ccsv6/ccs_base/arm/include/msp432p401r_classic.h
+mmc_ssp.obj: C:/ti/ccsv6/ccs_base/arm/include/CMSIS/core_cm4.h
+mmc_ssp.obj: C:/ti/ccsv6/ccs_base/arm/include/CMSIS/core_cmInstr.h
+mmc_ssp.obj: C:/ti/ccsv6/ccs_base/arm/include/CMSIS/core_cmFunc.h
+mmc_ssp.obj: C:/ti/ccsv6/ccs_base/arm/include/CMSIS/core_cmSimd.h
+mmc_ssp.obj: C:/ti/ccsv6/ccs_base/arm/include/system_msp432p401r.h
+mmc_ssp.obj: C:/ti/ccsv6/tools/compiler/ti-cgt-arm_16.9.3.LTS/include/stdbool.h
 mmc_ssp.obj: C:/ti/msp/MSP432Ware_3_50_00_02/driverlib/driverlib/MSP432P4xx/aes256.h
 mmc_ssp.obj: C:/ti/msp/MSP432Ware_3_50_00_02/driverlib/driverlib/MSP432P4xx/comp_e.h
 mmc_ssp.obj: C:/ti/msp/MSP432Ware_3_50_00_02/driverlib/driverlib/MSP432P4xx/cpu.h
@@ -41,26 +43,29 @@ mmc_ssp.obj: C:/ti/msp/MSP432Ware_3_50_00_02/driverlib/driverlib/MSP432P4xx/time
 mmc_ssp.obj: C:/ti/msp/MSP432Ware_3_50_00_02/driverlib/driverlib/MSP432P4xx/timer_a.h
 mmc_ssp.obj: C:/ti/msp/MSP432Ware_3_50_00_02/driverlib/driverlib/MSP432P4xx/uart.h
 mmc_ssp.obj: C:/ti/msp/MSP432Ware_3_50_00_02/driverlib/driverlib/MSP432P4xx/wdt_a.h
-mmc_ssp.obj: C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.2.LTS/include/stdio.h
-mmc_ssp.obj: C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.2.LTS/include/linkage.h
-mmc_ssp.obj: C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.2.LTS/include/stdarg.h
-mmc_ssp.obj: C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.2.LTS/include/string.h
+mmc_ssp.obj: C:/ti/ccsv6/tools/compiler/ti-cgt-arm_16.9.3.LTS/include/stdio.h
+mmc_ssp.obj: C:/ti/ccsv6/tools/compiler/ti-cgt-arm_16.9.3.LTS/include/linkage.h
+mmc_ssp.obj: C:/ti/ccsv6/tools/compiler/ti-cgt-arm_16.9.3.LTS/include/stdarg.h
+mmc_ssp.obj: C:/ti/ccsv6/tools/compiler/ti-cgt-arm_16.9.3.LTS/include/string.h
+mmc_ssp.obj: ../sd.h
 mmc_ssp.obj: ../diskio.h
 mmc_ssp.obj: ../integer.h
 
 ../mmc_ssp.c: 
 C:/ti/msp/MSP432Ware_3_50_00_02/driverlib/driverlib/MSP432P4xx/driverlib.h: 
 C:/ti/msp/MSP432Ware_3_50_00_02/driverlib/driverlib/MSP432P4xx/adc14.h: 
-C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.2.LTS/include/stdint.h: 
-C:/ti/ccsv7/ccs_base/arm/include/msp.h: 
-C:/ti/ccsv7/ccs_base/arm/include/msp432p401r.h: 
-C:/ti/ccsv7/ccs_base/arm/include/msp_compatibility.h: 
-C:/ti/ccsv7/ccs_base/arm/include/CMSIS/cmsis_ccs.h: 
-C:/ti/ccsv7/ccs_base/arm/include/msp432p401r_classic.h: 
-C:/ti/ccsv7/ccs_base/arm/include/CMSIS/core_cm4.h: 
-C:/ti/ccsv7/ccs_base/arm/include/CMSIS/cmsis_compiler.h: 
-C:/ti/ccsv7/ccs_base/arm/include/system_msp432p401r.h: 
-C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.2.LTS/include/stdbool.h: 
+C:/ti/ccsv6/tools/compiler/ti-cgt-arm_16.9.3.LTS/include/stdint.h: 
+C:/ti/ccsv6/ccs_base/arm/include/msp.h: 
+C:/ti/ccsv6/ccs_base/arm/include/msp432p401r.h: 
+C:/ti/ccsv6/ccs_base/arm/include/msp_compatibility.h: 
+C:/ti/ccsv6/ccs_base/arm/include/CMSIS/cmsis_ccs.h: 
+C:/ti/ccsv6/ccs_base/arm/include/msp432p401r_classic.h: 
+C:/ti/ccsv6/ccs_base/arm/include/CMSIS/core_cm4.h: 
+C:/ti/ccsv6/ccs_base/arm/include/CMSIS/core_cmInstr.h: 
+C:/ti/ccsv6/ccs_base/arm/include/CMSIS/core_cmFunc.h: 
+C:/ti/ccsv6/ccs_base/arm/include/CMSIS/core_cmSimd.h: 
+C:/ti/ccsv6/ccs_base/arm/include/system_msp432p401r.h: 
+C:/ti/ccsv6/tools/compiler/ti-cgt-arm_16.9.3.LTS/include/stdbool.h: 
 C:/ti/msp/MSP432Ware_3_50_00_02/driverlib/driverlib/MSP432P4xx/aes256.h: 
 C:/ti/msp/MSP432Ware_3_50_00_02/driverlib/driverlib/MSP432P4xx/comp_e.h: 
 C:/ti/msp/MSP432Ware_3_50_00_02/driverlib/driverlib/MSP432P4xx/cpu.h: 
@@ -89,9 +94,10 @@ C:/ti/msp/MSP432Ware_3_50_00_02/driverlib/driverlib/MSP432P4xx/timer32.h:
 C:/ti/msp/MSP432Ware_3_50_00_02/driverlib/driverlib/MSP432P4xx/timer_a.h: 
 C:/ti/msp/MSP432Ware_3_50_00_02/driverlib/driverlib/MSP432P4xx/uart.h: 
 C:/ti/msp/MSP432Ware_3_50_00_02/driverlib/driverlib/MSP432P4xx/wdt_a.h: 
-C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.2.LTS/include/stdio.h: 
-C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.2.LTS/include/linkage.h: 
-C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.2.LTS/include/stdarg.h: 
-C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.2.LTS/include/string.h: 
+C:/ti/ccsv6/tools/compiler/ti-cgt-arm_16.9.3.LTS/include/stdio.h: 
+C:/ti/ccsv6/tools/compiler/ti-cgt-arm_16.9.3.LTS/include/linkage.h: 
+C:/ti/ccsv6/tools/compiler/ti-cgt-arm_16.9.3.LTS/include/stdarg.h: 
+C:/ti/ccsv6/tools/compiler/ti-cgt-arm_16.9.3.LTS/include/string.h: 
+../sd.h: 
 ../diskio.h: 
 ../integer.h: 

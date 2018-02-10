@@ -1,35 +1,34 @@
 ******************************************************************************
-                  TI ARM Linker PC v16.9.2                     
+                  TI ARM Linker PC v16.9.3                     
 ******************************************************************************
->> Linked Wed May 03 23:20:54 2017
+>> Linked Sun May 07 02:21:42 2017
 
 OUTPUT FILE NAME:   <driverlib_empty_project.out>
-ENTRY POINT SYMBOL: "_c_int00"  address: 0001a839
+ENTRY POINT SYMBOL: "_c_int00"  address: 00019169
 
 
 MEMORY CONFIGURATION
 
          name            origin    length      used     unused   attr    fill
 ----------------------  --------  ---------  --------  --------  ----  --------
-  MAIN                  00000000   00040000  0001ac0a  000253f6  R  X
+  MAIN                  00000000   00040000  000193d6  00026c2a  R  X
   INFO                  00200000   00004000  00000000  00004000  R  X
   SRAM_CODE             01000000   00010000  00000000  00010000  RW X
-  SRAM_DATA             20000000   00010000  00001c4e  0000e3b2  RW  
+  SRAM_DATA             20000000   00010000  00000fbd  0000f043  RW  
 
 
 SEGMENT ALLOCATION MAP
 
 run origin  load origin   length   init length attrs members
 ----------  ----------- ---------- ----------- ----- -------
-00000000    00000000    0001ac10   0001ac10    r-x
+00000000    00000000    000193d8   000193d8    r-x
   00000000    00000000    00000140   00000140    r-- .intvecs
   00000140    00000140    0001234e   0001234e    r-- .const
-  00012490    00012490    000086ac   000086ac    r-x .text
-  0001ab40    0001ab40    000000d0   000000d0    r-- .cinit
-20000000    20000000    00001a51   00000000    rw-
-  20000000    20000000    00000fbd   00000000    rw- .bss
-  20000fc0    20000fc0    00000800   00000000    rw- .sysmem
-  200017c0    200017c0    00000291   00000000    rw- .data
+  00012490    00012490    00006ee0   00006ee0    r-x .text
+  00019370    00019370    00000068   00000068    r-- .cinit
+20000000    20000000    00000dbd   00000000    rw-
+  20000000    20000000    00000d20   00000000    rw- .bss
+  20000d20    20000d20    0000009d   00000000    rw- .data
 2000fe00    2000fe00    00000200   00000000    rw-
   2000fe00    2000fe00    00000200   00000000    rw- .stack
 
@@ -55,113 +54,79 @@ section   page    origin      length       input sections
                   00012483    00000001     --HOLE-- [fill = 0]
                   00012484    0000000a     main.obj (.const:.string)
 
-.text      0    00012490    000086ac     
-                  00012490    0000396c     ff.obj (.text)
-                  00015dfc    00000eb8     player1063.obj (.text)
-                  00016cb4    00000c84     main.obj (.text)
-                  00017938    00000a38     mmc_ssp.obj (.text)
-                  00018370    00000a34     lcd.obj (.text)
-                  00018da4    000003d0     rtsv7M4_T_le_v4SPD16_eabi.lib : memory.obj (.text)
-                  00019174    00000328     system_msp432p401r.obj (.text)
-                  0001949c    00000324     rtsv7M4_T_le_v4SPD16_eabi.lib : trgdrv.obj (.text)
-                  000197c0    0000030c                                   : lowlev.obj (.text)
-                  00019acc    000001c4                                   : fopen.obj (.text)
-                  00019c90    0000016c                                   : fwrite.obj (.text)
-                  00019dfc    00000104     cc932.obj (.text)
-                  00019f00    000000fc     rtsv7M4_T_le_v4SPD16_eabi.lib : fd_mul_t2.obj (.text)
-                  00019ffc    000000ec                                   : fread.obj (.text)
-                  0001a0e8    000000dc                                   : setvbuf.obj (.text)
-                  0001a1c4    000000c8                                   : fflush.obj (.text)
-                  0001a28c    000000ac                                   : _io_perm.obj (.text)
-                  0001a338    000000a0                                   : _bufread.obj (.text)
-                  0001a3d8    0000009c                                   : memcpy_t2.obj (.text)
-                  0001a474    00000098                                   : fclose.obj (.text)
-                  0001a50c    00000098                                   : fputc.obj (.text)
-                  0001a5a4    0000007a                                   : memset_t2.obj (.text)
-                  0001a61e    00000002                                   : mpu_init.obj (.text)
-                  0001a620    00000074     ir.obj (.text)
-                  0001a694    00000070     rtsv7M4_T_le_v4SPD16_eabi.lib : autoinit.obj (.text)
-                  0001a704    00000068                                   : copy_decompress_lzss.obj (.text:decompress:lzss)
-                  0001a76c    00000068                                   : trgmsg.obj (.text)
-                  0001a7d4    00000064                                   : fseek.obj (.text)
-                  0001a838    00000054                                   : boot.obj (.text)
-                  0001a88c    00000054                                   : exit.obj (.text)
-                  0001a8e0    0000004c                                   : cpy_tbl.obj (.text)
-                  0001a92c    0000004c                                   : rand.obj (.text)
-                  0001a978    00000048                                   : fd_toi_t2.obj (.text)
-                  0001a9c0    00000036                                   : strncpy.obj (.text)
-                  0001a9f6    0000002e                                   : i_tofd_t2.obj (.text)
-                  0001aa24    00000020                                   : memchr.obj (.text)
-                  0001aa44    00000018                                   : args_main.obj (.text)
-                  0001aa5c    00000018                                   : strcmp.obj (.text)
-                  0001aa74    00000016                                   : strchr.obj (.text)
-                  0001aa8a    00000002                                   : startup.obj (.text)
-                  0001aa8c    00000014     msp432p4xx_driverlib.lib : systick.o (.text:SysTick_enableInterrupt)
-                  0001aaa0    00000014                              : systick.o (.text:SysTick_enableModule)
-                  0001aab4    00000014     rtsv7M4_T_le_v4SPD16_eabi.lib : _lock.obj (.text)
-                  0001aac8    00000014                                   : strcpy.obj (.text)
-                  0001aadc    00000014                                   : strlen.obj (.text)
-                  0001aaf0    00000012     startup_msp432p401r_ccs.obj (.text)
-                  0001ab02    0000000e     rtsv7M4_T_le_v4SPD16_eabi.lib : copy_decompress_none.obj (.text:decompress:none)
-                  0001ab10    0000000e                                   : time.obj (.text)
-                  0001ab1e    00000002     --HOLE-- [fill = 0]
-                  0001ab20    0000000c     msp432p4xx_driverlib.lib : systick.o (.text:SysTick_setPeriod)
-                  0001ab2c    0000000c     rtsv7M4_T_le_v4SPD16_eabi.lib : copy_zero_init.obj (.text:decompress:ZI)
-                  0001ab38    00000004                                   : pre_init.obj (.text)
+.text      0    00012490    00006ee0     
+                  00012490    00003970     ff.obj (.text)
+                  00015e00    00000db8     mmc_ssp.obj (.text)
+                  00016bb8    00000bc4     main.obj (.text)
+                  0001777c    00000a28     lcd.obj (.text)
+                  000181a4    000005a0     player1063.obj (.text)
+                  00018744    00000328     system_msp432p401r.obj (.text)
+                  00018a6c    00000324     rtsv7M4_T_le_v4SPD16_eabi.lib : trgdrv.obj (.text)
+                  00018d90    00000104     cc932.obj (.text)
+                  00018e94    0000009c     rtsv7M4_T_le_v4SPD16_eabi.lib : memcpy_t2.obj (.text)
+                  00018f30    0000007c     ir.obj (.text)
+                  00018fac    0000007a     rtsv7M4_T_le_v4SPD16_eabi.lib : memset_t2.obj (.text)
+                  00019026    00000002                                   : mpu_init.obj (.text)
+                  00019028    00000070                                   : autoinit.obj (.text)
+                  00019098    00000068                                   : copy_decompress_lzss.obj (.text:decompress:lzss)
+                  00019100    00000068                                   : trgmsg.obj (.text)
+                  00019168    00000054                                   : boot.obj (.text)
+                  000191bc    00000054                                   : exit.obj (.text)
+                  00019210    0000004c                                   : cpy_tbl.obj (.text)
+                  0001925c    0000004c                                   : rand.obj (.text)
+                  000192a8    00000018                                   : args_main.obj (.text)
+                  000192c0    00000014     msp432p4xx_driverlib.lib : systick.o (.text:SysTick_enableInterrupt)
+                  000192d4    00000014                              : systick.o (.text:SysTick_enableModule)
+                  000192e8    00000014     rtsv7M4_T_le_v4SPD16_eabi.lib : _lock.obj (.text)
+                  000192fc    00000014                                   : strcpy.obj (.text)
+                  00019310    00000014                                   : strlen.obj (.text)
+                  00019324    00000012     startup_msp432p401r_ccs.obj (.text)
+                  00019336    0000000e     rtsv7M4_T_le_v4SPD16_eabi.lib : copy_decompress_none.obj (.text:decompress:none)
+                  00019344    0000000e                                   : time.obj (.text)
+                  00019352    00000002                                   : startup.obj (.text)
+                  00019354    0000000c     msp432p4xx_driverlib.lib : systick.o (.text:SysTick_setPeriod)
+                  00019360    0000000c     rtsv7M4_T_le_v4SPD16_eabi.lib : copy_zero_init.obj (.text:decompress:ZI)
+                  0001936c    00000004                                   : pre_init.obj (.text)
 
-.cinit     0    0001ab40    000000d0     
-                  0001ab40    000000a7     (.cinit..data.load) [load image, compression = lzss]
-                  0001abe7    00000001     --HOLE-- [fill = 0]
-                  0001abe8    0000000c     (__TI_handler_table)
-                  0001abf4    00000004     --HOLE-- [fill = 0]
-                  0001abf8    00000008     (.cinit..bss.load) [load image, compression = zero_init]
-                  0001ac00    00000010     (__TI_cinit_table)
+.cinit     0    00019370    00000068     
+                  00019370    00000042     (.cinit..data.load) [load image, compression = lzss]
+                  000193b2    00000002     --HOLE-- [fill = 0]
+                  000193b4    0000000c     (__TI_handler_table)
+                  000193c0    00000008     (.cinit..bss.load) [load image, compression = zero_init]
+                  000193c8    00000010     (__TI_cinit_table)
 
 .init_array 
 *          0    00000000    00000000     UNINITIALIZED
 
-.bss       0    20000000    00000fbd     UNINITIALIZED
+.bss       0    20000000    00000d20     UNINITIALIZED
                   20000000    00000450     (.common:File)
                   20000450    00000238     (.common:FatFs)
-                  20000688    00000200     ff.obj (.bss:LfnBuf)
-                  20000888    00000200     player1063.obj (.bss:playBuf$1)
-                  20000a88    00000200     player1063.obj (.bss:recBuf$6)
-                  20000c88    00000120     rtsv7M4_T_le_v4SPD16_eabi.lib : trgmsg.obj (.bss:_CIOBUF_)
-                  20000da8    000000a0     (.common:__TI_tmpnams)
-                  20000e48    00000088     (.common:array)
-                  20000ed0    00000084     (.common:Buff2)
-                  20000f54    00000040     (.common:Buff)
-                  20000f94    00000009     mmc_ssp.obj (.bss)
-                  20000f9d    00000008     rtsv7M4_T_le_v4SPD16_eabi.lib : trgdrv.obj (.bss:parmbuf)
-                  20000fa5    00000008     (.common:vol_level)
-                  20000fad    00000001     (.common:fres)
-                  20000fae    00000002     ff.obj (.bss)
-                  20000fb0    00000004     ff.obj (.bss:FatFs)
-                  20000fb4    00000004     (.common:file_path)
-                  20000fb8    00000004     (.common:s1)
-                  20000fbc    00000001     (.common:playerState)
+                  20000688    00000204     (.common:receiveBuffer)
+                  2000088c    00000200     ff.obj (.bss:LfnBuf)
+                  20000a8c    00000120     rtsv7M4_T_le_v4SPD16_eabi.lib : trgmsg.obj (.bss:_CIOBUF_)
+                  20000bac    00000088     (.common:array)
+                  20000c34    00000084     (.common:Buff2)
+                  20000cb8    00000040     (.common:Buff)
+                  20000cf8    00000009     mmc_ssp.obj (.bss)
+                  20000d01    00000008     rtsv7M4_T_le_v4SPD16_eabi.lib : trgdrv.obj (.bss:parmbuf)
+                  20000d09    00000008     (.common:vol_level)
+                  20000d11    00000001     (.common:fres)
+                  20000d12    00000002     ff.obj (.bss)
+                  20000d14    00000004     ff.obj (.bss:FatFs)
+                  20000d18    00000004     (.common:file_path)
+                  20000d1c    00000004     (.common:s1)
 
-.sysmem    0    20000fc0    00000800     UNINITIALIZED
-                  20000fc0    00000008     rtsv7M4_T_le_v4SPD16_eabi.lib : memory.obj (.sysmem)
-                  20000fc8    000007f8     --HOLE--
-
-.data      0    200017c0    00000291     UNINITIALIZED
-                  200017c0    000000f0     rtsv7M4_T_le_v4SPD16_eabi.lib : defs.obj (.data:_ftable)
-                  200018b0    000000d0                                   : lowlev.obj (.data:$O1$$)
-                  20001980    00000060     main.obj (.data)
-                  200019e0    00000014     player1063.obj (.data)
-                  200019f4    00000010     rtsv7M4_T_le_v4SPD16_eabi.lib : defs.obj (.data)
-                  20001a04    0000000c                                   : exit.obj (.data:$O1$$)
-                  20001a10    0000000c                                   : memory.obj (.data:$O1$$)
-                  20001a1c    0000000c     lcd.obj (.data:mp3)
-                  20001a28    0000000c     lcd.obj (.data:text)
-                  20001a34    00000008     rtsv7M4_T_le_v4SPD16_eabi.lib : _lock.obj (.data:$O1$$)
-                  20001a3c    00000004     lcd.obj (.data)
-                  20001a40    00000004     rtsv7M4_T_le_v4SPD16_eabi.lib : fopen.obj (.data)
-                  20001a44    00000004                                   : rand.obj (.data)
-                  20001a48    00000004                                   : stkdepth_vars.obj (.data)
-                  20001a4c    00000004     system_msp432p401r.obj (.data)
-                  20001a50    00000001     mmc_ssp.obj (.data)
+.data      0    20000d20    0000009d     UNINITIALIZED
+                  20000d20    00000060     main.obj (.data)
+                  20000d80    0000000c     rtsv7M4_T_le_v4SPD16_eabi.lib : exit.obj (.data:$O1$$)
+                  20000d8c    0000000c     lcd.obj (.data:mp3)
+                  20000d98    0000000c     lcd.obj (.data:text)
+                  20000da4    00000008     rtsv7M4_T_le_v4SPD16_eabi.lib : _lock.obj (.data:$O1$$)
+                  20000dac    00000004     lcd.obj (.data)
+                  20000db0    00000004     rtsv7M4_T_le_v4SPD16_eabi.lib : rand.obj (.data)
+                  20000db4    00000004                                   : stkdepth_vars.obj (.data)
+                  20000db8    00000004     system_msp432p401r.obj (.data)
+                  20000dbc    00000001     mmc_ssp.obj (.data)
 
 .stack     0    2000fe00    00000200     UNINITIALIZED
                   2000fe00    00000200     --HOLE--
@@ -171,16 +136,16 @@ MODULE SUMMARY
        Module                        code    ro data   rw data
        ------                        ----    -------   -------
     .\
-       player1063.obj                3768    14408     1045   
-       ff.obj                        14700   29        518    
-       lcd.obj                       2612    46        1773   
-       main.obj                      3204    10        372    
-       mmc_ssp.obj                   2616    0         10     
+       player1063.obj                1440    14408     0      
+       ff.obj                        14704   29        518    
+       lcd.obj                       2600    46        1773   
+       mmc_ssp.obj                   3512    0         526    
+       main.obj                      3012    10        372    
        system_msp432p401r.obj        808     0         4      
        startup_msp432p401r_ccs.obj   18      320       0      
-       ir.obj                        116     0         0      
+       ir.obj                        124     0         0      
     +--+-----------------------------+-------+---------+---------+
-       Total:                        27842   14813     3722   
+       Total:                        26218   14813     3193   
                                                               
     .\option\
        cc932.obj                     260     60080     0      
@@ -192,39 +157,19 @@ MODULE SUMMARY
     +--+-----------------------------+-------+---------+---------+
        Total:                        52      0         0      
                                                               
-    C:\ti\ccsv7\tools\compiler\ti-cgt-arm_16.9.2.LTS\lib\rtsv7M4_T_le_v4SPD16_eabi.lib
-       lowlev.obj                    780     0         208    
-       memory.obj                    976     0         12     
+    C:\ti\ccsv6\tools\compiler\ti-cgt-arm_16.9.3.LTS\lib\rtsv7M4_T_le_v4SPD16_eabi.lib
        trgdrv.obj                    804     0         8      
-       fopen.obj                     452     0         4      
-       defs.obj                      0       0         416    
        trgmsg.obj                    104     0         288    
-       fwrite.obj                    364     0         0      
-       fd_mul_t2.obj                 252     0         0      
-       fread.obj                     236     0         0      
-       setvbuf.obj                   220     0         0      
-       fflush.obj                    200     0         0      
-       _io_perm.obj                  172     0         0      
-       _bufread.obj                  160     0         0      
        memcpy_t2.obj                 156     0         0      
-       fclose.obj                    152     0         0      
-       fputc.obj                     152     0         0      
        memset_t2.obj                 122     0         0      
        autoinit.obj                  112     0         0      
        copy_decompress_lzss.obj      104     0         0      
-       fseek.obj                     100     0         0      
        exit.obj                      84      0         12     
        boot.obj                      84      0         0      
        rand.obj                      76      0         4      
        cpy_tbl.obj                   76      0         0      
-       fd_toi_t2.obj                 72      0         0      
-       strncpy.obj                   54      0         0      
-       i_tofd_t2.obj                 46      0         0      
-       memchr.obj                    32      0         0      
        _lock.obj                     20      0         8      
        args_main.obj                 24      0         0      
-       strcmp.obj                    24      0         0      
-       strchr.obj                    22      0         0      
        strcpy.obj                    20      0         0      
        strlen.obj                    20      0         0      
        copy_decompress_none.obj      14      0         0      
@@ -235,25 +180,24 @@ MODULE SUMMARY
        mpu_init.obj                  2       0         0      
        startup.obj                   2       0         0      
     +--+-----------------------------+-------+---------+---------+
-       Total:                        6320    0         964    
+       Total:                        1854    0         324    
                                                               
-       Heap:                         0       0         2048   
        Stack:                        0       0         512    
-       Linker Generated:             0       203       0      
+       Linker Generated:             0       102       0      
     +--+-----------------------------+-------+---------+---------+
-       Grand Total:                  34474   75096     7246   
+       Grand Total:                  28384   74995     4029   
 
 
 LINKER GENERATED COPY TABLES
 
-__TI_cinit_table @ 0001ac00 records: 2, size/record: 8, table size: 16
-	.data: load addr=0001ab40, load size=000000a7 bytes, run addr=200017c0, run size=00000291 bytes, compression=lzss
-	.bss: load addr=0001abf8, load size=00000008 bytes, run addr=20000000, run size=00000fbd bytes, compression=zero_init
+__TI_cinit_table @ 000193c8 records: 2, size/record: 8, table size: 16
+	.data: load addr=00019370, load size=00000042 bytes, run addr=20000d20, run size=0000009d bytes, compression=lzss
+	.bss: load addr=000193c0, load size=00000008 bytes, run addr=20000000, run size=00000d20 bytes, compression=zero_init
 
 
 LINKER GENERATED HANDLER TABLE
 
-__TI_handler_table @ 0001abe8 records: 3, size/record: 4, table size: 12
+__TI_handler_table @ 000193b4 records: 3, size/record: 4, table size: 12
 	index: 0, handler: __TI_decompress_lzss
 	index: 1, handler: __TI_decompress_none
 	index: 2, handler: __TI_zero_init
@@ -263,269 +207,226 @@ GLOBAL SYMBOLS: SORTED ALPHABETICALLY BY Name
 
 address   name                           
 -------   ----                           
-20000f54  Buff                           
-20000ed0  Buff2                          
-0001a88d  C$$EXIT                        
-0001a79b  C$$IO$$                        
-00018397  Delayms                        
+20000cb8  Buff                           
+20000c34  Buff2                          
+000191bd  C$$EXIT                        
+0001912f  C$$IO$$                        
+000177a3  Delayms                        
 20000450  FatFs                          
 20000000  File                           
-00016079  GetUICommand                   
-00019777  HOSTclock                      
-0001973f  HOSTclose                      
-00019701  HOSTgetenv                     
-000196a5  HOSTlseek                      
-00019653  HOSTopen                       
-00019607  HOSTread                       
-000195a9  HOSTrename                     
-0001956f  HOSTtime                       
-00019521  HOSTtime64                     
-000194e9  HOSTunlink                     
-0001949d  HOSTwrite                      
-00016185  LoadPlugin                     
-00017789  PORT5_IRQHandler               
-00017789  PORT5_IRQHandler               
-00015f4b  ReadSci                        
-00015f15  ReadSpiByte                    
-00016105  ReadVS10xxMem                  
-000160d9  ReadVS10xxMem32                
-0001607b  ReadVS10xxMem32Counter         
-00016077  RestoreUIState                 
+00018421  GetUICommand                   
+00018d47  HOSTclock                      
+00018d0f  HOSTclose                      
+00018cd1  HOSTgetenv                     
+00018c75  HOSTlseek                      
+00018c23  HOSTopen                       
+00018bd7  HOSTread                       
+00018b79  HOSTrename                     
+00018b3f  HOSTtime                       
+00018af1  HOSTtime64                     
+00018ab9  HOSTunlink                     
+00018a6d  HOSTwrite                      
+00018531  LoadPlugin                     
+000175c9  PORT5_IRQHandler               
+000175c9  PORT5_IRQHandler               
+000182f3  ReadSci                        
+000182bd  ReadSpiByte                    
+000184af  ReadVS10xxMem                  
+00018483  ReadVS10xxMem32                
+00018425  ReadVS10xxMem32Counter         
+0001841f  RestoreUIState                 
 UNDEFED   SHT$$INIT_ARRAY$$Base          
 UNDEFED   SHT$$INIT_ARRAY$$Limit         
-00016075  SaveUIState                    
-00016cb5  SysTick_Handler                
-0001aa8d  SysTick_enableInterrupt        
-0001aaa1  SysTick_enableModule           
-0001ab21  SysTick_setPeriod              
-20001a4c  SystemCoreClock                
-00019175  SystemCoreClockUpdate          
-000193e9  SystemInit                     
-0001624d  VS1063PlayFile                 
-00016865  VS1063RecordFile               
-00016c4d  VSTestHandleFile               
-00016b35  VSTestInitHardware             
-00016b91  VSTestInitSoftware             
+0001841d  SaveUIState                    
+00016bb9  SysTick_Handler                
+000192c1  SysTick_enableInterrupt        
+000192d5  SysTick_enableModule           
+00019355  SysTick_setPeriod              
+20000db8  SystemCoreClock                
+00018745  SystemCoreClockUpdate          
+000189b9  SystemInit                     
+000185e9  VS1063PlayFile                 
+000185f9  VS1063RecordFile               
+00018721  VSTestHandleFile               
+00018609  VSTestInitHardware             
+00018665  VSTestInitSoftware             
 4000480c  WDTCTL_SYM                     
-00015fd5  WriteSci                       
-00016029  WriteSdi                       
-00015ee5  WriteSpiByte                   
-00015eb7  WriteSpiByteSDI                
-0001611d  WriteVS10xxMem                 
-0001613d  WriteVS10xxMem32               
-20000c88  __CIOBUF_                      
+0001837d  WriteSci                       
+000183d1  WriteSdi                       
+0001828d  WriteSpiByte                   
+0001825f  WriteSpiByteSDI                
+000184c7  WriteVS10xxMem                 
+000184e7  WriteVS10xxMem32               
+20000a8c  __CIOBUF_                      
 20010000  __STACK_END                    
 00000200  __STACK_SIZE                   
-00000800  __SYSMEM_SIZE                  
-0001ac00  __TI_CINIT_Base                
-0001ac10  __TI_CINIT_Limit               
-0001abe8  __TI_Handler_Table_Base        
-0001abf4  __TI_Handler_Table_Limit       
-0001a695  __TI_auto_init                 
-0001a339  __TI_buff_read                 
-00019b95  __TI_cleanup                   
-20001a04  __TI_cleanup_ptr               
-0001a475  __TI_closefile                 
-0001a705  __TI_decompress_lzss           
-0001ab03  __TI_decompress_none           
-0001a1c5  __TI_doflush                   
-20001a08  __TI_dtors_ptr                 
-20001a0c  __TI_enable_exit_profile_output
-200019f4  __TI_ft_end                    
+000193c8  __TI_CINIT_Base                
+000193d8  __TI_CINIT_Limit               
+000193b4  __TI_Handler_Table_Base        
+000193c0  __TI_Handler_Table_Limit       
+00019029  __TI_auto_init                 
+20000d80  __TI_cleanup_ptr               
+00019099  __TI_decompress_lzss           
+00019337  __TI_decompress_none           
+20000d84  __TI_dtors_ptr                 
+20000d88  __TI_enable_exit_profile_output
 ffffffff  __TI_pprof_out_hndl            
 ffffffff  __TI_prof_data_size            
 ffffffff  __TI_prof_data_start           
-0001a2ef  __TI_rd_ok                     
-0001a79f  __TI_readmsg                   
+00019133  __TI_readmsg                   
 00000000  __TI_static_base__             
-20000da8  __TI_tmpnams                   
-0001a76d  __TI_writemsg                  
-0001a28d  __TI_wrt_ok                    
-0001ab2d  __TI_zero_init                 
-0001a979  __aeabi_d2iz                   
-00019f01  __aeabi_dmul                   
-0001a9f7  __aeabi_i2d                    
-0001a5a5  __aeabi_memclr                 
-0001a5a5  __aeabi_memclr4                
-0001a5a5  __aeabi_memclr8                
-0001a3d9  __aeabi_memcpy                 
-0001a3d9  __aeabi_memcpy4                
-0001a3d9  __aeabi_memcpy8                
-0001a5a7  __aeabi_memset                 
-0001a5a7  __aeabi_memset4                
-0001a5a7  __aeabi_memset8                
-20001a00  __aeabi_stderr                 
-200019f8  __aeabi_stdin                  
-200019fc  __aeabi_stdout                 
+00019101  __TI_writemsg                  
+00019361  __TI_zero_init                 
+00018fad  __aeabi_memclr                 
+00018fad  __aeabi_memclr4                
+00018fad  __aeabi_memclr8                
+00018e95  __aeabi_memcpy                 
+00018e95  __aeabi_memcpy4                
+00018e95  __aeabi_memcpy8                
+00018faf  __aeabi_memset                 
+00018faf  __aeabi_memset4                
+00018faf  __aeabi_memset8                
 ffffffff  __binit__                      
 ffffffff  __c_args__                     
-0001a61f  __mpu_init                     
+00019027  __mpu_init                     
 2000fe00  __stack                        
-0001ab11  __time32                       
-0001aa45  _args_main                     
-0001a839  _c_int00                       
-200017c0  _ftable                        
-20001a34  _lock                          
-0001aac3  _nop                           
-0001aabb  _register_lock                 
-0001aab5  _register_unlock               
-20000fc0  _sys_memory                    
-0001aa8b  _system_post_cinit             
-0001ab39  _system_pre_init               
-20001a38  _unlock                        
-0001a891  abort                          
-00019a21  add_device                     
-20000e48  array                          
-200019e0  audioFormat                    
+00019345  __time32                       
+000192a9  _args_main                     
+00019169  _c_int00                       
+20000da4  _lock                          
+000192f7  _nop                           
+000192ef  _register_lock                 
+000192e9  _register_unlock               
+00019353  _system_post_cinit             
+0001936d  _system_pre_init               
+20000da8  _unlock                        
+000191c1  abort                          
+20000bac  array                          
 ffffffff  binit                          
-000170f5  button_pressed                 
-20001984  button_type                    
-00019145  calloc                         
-0001846f  check_busy_flag                
+00016ff9  button_pressed                 
+20000d24  button_type                    
+00015f09  changeCRCcheck                 
+0001787b  check_busy_flag                
 00012446  chipNumber                     
-000199d1  close                          
-20001a3c  cnt                            
-000184ed  commandWrite                   
-0001a8e1  copy_in                        
-200019b8  current_music_option           
-200019a8  current_volume                 
-00018ced  custom_char_loop               
-00018d51  custom_char_loop_off           
-00018b71  custom_char_next               
-00018b1d  custom_char_pause              
-00018a9d  custom_char_play               
-00018be9  custom_char_prev               
-00018c95  custom_char_shuffle_off        
-00018c3d  custom_char_shuffle_on         
-0001857f  dataRead                       
-0001855b  dataWrite                      
-20001980  data_byte                      
-20001990  data_received_flag             
-00016ce7  decode                         
-0001ab01  defaultISR                     
-00015dfd  delay                          
-000183bb  delay_ms                       
-00017c35  disk_initialize                
-00017fb5  disk_ioctl                     
-00017ef1  disk_read                      
-00017ecb  disk_status                    
-0001831f  disk_timerproc                 
-00017f89  disk_write                     
-0001a899  exit                           
-00014d7d  f_chdir                        
-000159b3  f_chmod                        
-00014d4b  f_close                        
-00015231  f_closedir                     
-00014df1  f_getcwd                       
-0001531f  f_getfree                      
-00015ac9  f_getlabel                     
-00014f61  f_lseek                        
-00015681  f_mkdir                        
+20000dac  cnt                            
+000178f9  commandWrite                   
+00019211  copy_in                        
+20000d58  current_music_option           
+20000d48  current_volume                 
+000180ed  custom_char_loop               
+00018151  custom_char_loop_off           
+00017f71  custom_char_next               
+00017f19  custom_char_pause              
+00017e9d  custom_char_play               
+00017fe9  custom_char_prev               
+00018095  custom_char_shuffle_off        
+0001803d  custom_char_shuffle_on         
+0001798b  dataRead                       
+00017967  dataWrite                      
+20000d20  data_byte                      
+20000d30  data_received_flag             
+00016beb  decode                         
+00019335  defaultISR                     
+000181a5  delay                          
+000177c7  delay_ms                       
+00016475  disk_initialize                
+000167fd  disk_ioctl                     
+0001673d  disk_read                      
+00016717  disk_status                    
+00016b67  disk_timerproc                 
+000167d5  disk_write                     
+000191c9  exit                           
+00014d7f  f_chdir                        
+000159b5  f_chmod                        
+00014d4d  f_close                        
+00015233  f_closedir                     
+00014df3  f_getcwd                       
+00015321  f_getfree                      
+00015acb  f_getlabel                     
+00014f63  f_lseek                        
+00015683  f_mkdir                        
 000144ab  f_mount                        
 00014531  f_open                         
-00015189  f_opendir                      
+0001518b  f_opendir                      
 000147e1  f_read                         
-00015253  f_readdir                      
-00015857  f_rename                       
-00015bc5  f_setlabel                     
-000152cb  f_stat                         
-00014c83  f_sync                         
-0001545b  f_truncate                     
-00015569  f_unlink                       
-00015a4d  f_utime                        
+00015255  f_readdir                      
+00015859  f_rename                       
+00015bc7  f_setlabel                     
+000152cd  f_stat                         
+00014c85  f_sync                         
+0001545d  f_truncate                     
+0001556b  f_unlink                       
+00015a4f  f_utime                        
 00014a01  f_write                        
-0001a4db  fclose                         
-00019dfd  ff_convert                     
-00019ea7  ff_wtoupper                    
-0001a211  fflush                         
-20000fb4  file_path                      
-00019beb  fopen                          
-0001a50d  fputc                          
-00019ffd  fread                          
-00018e8f  free                           
-00019bc1  freopen                        
-20000fad  fres                           
-0001a7d5  fseek                          
-00019c91  fwrite                         
-00016cbd  get_fattime                    
-00016de3  getvolumerange                 
-20001994  i                              
+00018d91  ff_convert                     
+00018e3b  ff_wtoupper                    
+20000d18  file_path                      
+20000d11  fres                           
+00016bc1  get_fattime                    
+00016ce7  getvolumerange                 
+20000d34  i                              
 00000000  interruptVectors               
-0001a621  irinit                         
-2000198c  irq_i                          
-200019b4  is_paused                      
-200019a4  k                              
-00018433  lcdBusyWait                    
-00018817  lcdclear                       
-00018a33  lcdcreatechar                  
-000185cd  lcdgotoaddr                    
-000185ed  lcdgotocgramaddr               
-0001899d  lcdinit                        
-000187e5  lcdmenu                        
-000188cb  lcdpopulatefiles               
-0001859f  lcdputch                       
-0001864b  lcdputchcustom                 
-000186a9  lcdputstr                      
-00018861  lcdreadtextfile                
-00018825  lcdscrolldown                  
-200019c8  loop                           
-200019cc  looped_song                    
-000199ad  lseek                          
-0001755d  main                           
-20001a48  main_func_sp                   
-00018e25  malloc                         
-00019059  memalign                       
-0001aa25  memchr                         
-0001a3d9  memcpy                         
-0001a5ad  memset                         
-200019c0  menu                           
-00016cc1  min                            
-00018da5  minit                          
-20001a1c  mp3                            
-200019b0  music_mode                     
-200019dc  music_path                     
-200019bc  music_play                     
-200019d8  my_path                        
-000198ff  open                           
-20000fbc  playerState                    
-00016f6d  playmusic                      
+00018f35  irinit                         
+20000d2c  irq_i                          
+20000d54  is_paused                      
+20000d44  k                              
+0001783f  lcdBusyWait                    
+00017beb  lcdclear                       
+00017e39  lcdcreatechar                  
+000179d9  lcdgotoaddr                    
+000179f9  lcdgotocgramaddr               
+00017da3  lcdinit                        
+00017bfd  lcdmenu                        
+00017cd1  lcdpopulatefiles               
+000179ab  lcdputch                       
+00017a57  lcdputchcustom                 
+00017ab5  lcdputstr                      
+00017c6b  lcdreadtextfile                
+00017c2f  lcdscrolldown                  
+20000d68  loop                           
+20000d6c  looped_song                    
+00017461  main                           
+20000db4  main_func_sp                   
+00018e95  memcpy                         
+00018fb5  memset                         
+20000d60  menu                           
+00016bc5  min                            
+20000d8c  mp3                            
+20000d50  music_mode                     
+20000d7c  music_path                     
+20000d5c  music_play                     
+20000d78  my_path                        
+00016e71  playmusic                      
 0000e830  plugin                         
-200019d4  power                          
-0001a50d  putc                           
-0001a591  putchar                        
-000184b7  putcommand                     
-00018525  putdata                        
-0001a943  rand                           
-00016ee9  random_number                  
-000198db  read                           
-200019ac  read_mode                      
-000183fd  readlcddata                    
-00018f51  realloc                        
-00017969  receive_response               
-2000199c  received_option                
-00019851  remove                         
-000198b3  remove_device                  
-00019875  rename                         
-20000fb8  s1                             
-0001a0e9  setvbuf                        
-200019c4  shuffle                        
-00015e1f  spiinit                        
-0001a92d  srand                          
-20001998  start_flag                     
-0001aa75  strchr                         
-0001aa5d  strcmp                         
-0001aac9  strcpy                         
-0001aadd  strlen                         
-0001a9c1  strncpy                        
-200019d0  systick_count                  
-200019a0  ta_error                       
-20001a28  text                           
-0001ab11  time                           
-00017939  transmit                       
-00019851  unlink                         
-20001988  valid_button                   
-20000fa5  vol_level                      
-000197c1  write                          
+20000d74  power                          
+000178c3  putcommand                     
+00017931  putdata                        
+00019273  rand                           
+00016ded  random_number                  
+00015f41  readCID                        
+00015fd9  readSector                     
+20000d4c  read_mode                      
+00017809  readlcddata                    
+20000688  receiveBuffer                  
+00015e6b  receive_ff                     
+00015ea5  receive_multiple_bytes         
+00015e31  receive_response               
+20000d3c  received_option                
+20000d1c  s1                             
+20000d64  shuffle                        
+000181c7  spiinit                        
+0001925d  srand                          
+20000d38  start_flag                     
+000192fd  strcpy                         
+00019311  strlen                         
+20000d70  systick_count                  
+20000d40  ta_error                       
+20000d98  text                           
+00019345  time                           
+00015e01  transmit                       
+20000d28  valid_button                   
+20000d09  vol_level                      
+000160e5  writeSector                    
 
 
 GLOBAL SYMBOLS: SORTED BY Symbol Address 
@@ -535,255 +436,212 @@ address   name
 00000000  __TI_static_base__             
 00000000  interruptVectors               
 00000200  __STACK_SIZE                   
-00000800  __SYSMEM_SIZE                  
 0000e830  plugin                         
 00012446  chipNumber                     
 000144ab  f_mount                        
 00014531  f_open                         
 000147e1  f_read                         
 00014a01  f_write                        
-00014c83  f_sync                         
-00014d4b  f_close                        
-00014d7d  f_chdir                        
-00014df1  f_getcwd                       
-00014f61  f_lseek                        
-00015189  f_opendir                      
-00015231  f_closedir                     
-00015253  f_readdir                      
-000152cb  f_stat                         
-0001531f  f_getfree                      
-0001545b  f_truncate                     
-00015569  f_unlink                       
-00015681  f_mkdir                        
-00015857  f_rename                       
-000159b3  f_chmod                        
-00015a4d  f_utime                        
-00015ac9  f_getlabel                     
-00015bc5  f_setlabel                     
-00015dfd  delay                          
-00015e1f  spiinit                        
-00015eb7  WriteSpiByteSDI                
-00015ee5  WriteSpiByte                   
-00015f15  ReadSpiByte                    
-00015f4b  ReadSci                        
-00015fd5  WriteSci                       
-00016029  WriteSdi                       
-00016075  SaveUIState                    
-00016077  RestoreUIState                 
-00016079  GetUICommand                   
-0001607b  ReadVS10xxMem32Counter         
-000160d9  ReadVS10xxMem32                
-00016105  ReadVS10xxMem                  
-0001611d  WriteVS10xxMem                 
-0001613d  WriteVS10xxMem32               
-00016185  LoadPlugin                     
-0001624d  VS1063PlayFile                 
-00016865  VS1063RecordFile               
-00016b35  VSTestInitHardware             
-00016b91  VSTestInitSoftware             
-00016c4d  VSTestHandleFile               
-00016cb5  SysTick_Handler                
-00016cbd  get_fattime                    
-00016cc1  min                            
-00016ce7  decode                         
-00016de3  getvolumerange                 
-00016ee9  random_number                  
-00016f6d  playmusic                      
-000170f5  button_pressed                 
-0001755d  main                           
-00017789  PORT5_IRQHandler               
-00017789  PORT5_IRQHandler               
-00017939  transmit                       
-00017969  receive_response               
-00017c35  disk_initialize                
-00017ecb  disk_status                    
-00017ef1  disk_read                      
-00017f89  disk_write                     
-00017fb5  disk_ioctl                     
-0001831f  disk_timerproc                 
-00018397  Delayms                        
-000183bb  delay_ms                       
-000183fd  readlcddata                    
-00018433  lcdBusyWait                    
-0001846f  check_busy_flag                
-000184b7  putcommand                     
-000184ed  commandWrite                   
-00018525  putdata                        
-0001855b  dataWrite                      
-0001857f  dataRead                       
-0001859f  lcdputch                       
-000185cd  lcdgotoaddr                    
-000185ed  lcdgotocgramaddr               
-0001864b  lcdputchcustom                 
-000186a9  lcdputstr                      
-000187e5  lcdmenu                        
-00018817  lcdclear                       
-00018825  lcdscrolldown                  
-00018861  lcdreadtextfile                
-000188cb  lcdpopulatefiles               
-0001899d  lcdinit                        
-00018a33  lcdcreatechar                  
-00018a9d  custom_char_play               
-00018b1d  custom_char_pause              
-00018b71  custom_char_next               
-00018be9  custom_char_prev               
-00018c3d  custom_char_shuffle_on         
-00018c95  custom_char_shuffle_off        
-00018ced  custom_char_loop               
-00018d51  custom_char_loop_off           
-00018da5  minit                          
-00018e25  malloc                         
-00018e8f  free                           
-00018f51  realloc                        
-00019059  memalign                       
-00019145  calloc                         
-00019175  SystemCoreClockUpdate          
-000193e9  SystemInit                     
-0001949d  HOSTwrite                      
-000194e9  HOSTunlink                     
-00019521  HOSTtime64                     
-0001956f  HOSTtime                       
-000195a9  HOSTrename                     
-00019607  HOSTread                       
-00019653  HOSTopen                       
-000196a5  HOSTlseek                      
-00019701  HOSTgetenv                     
-0001973f  HOSTclose                      
-00019777  HOSTclock                      
-000197c1  write                          
-00019851  remove                         
-00019851  unlink                         
-00019875  rename                         
-000198b3  remove_device                  
-000198db  read                           
-000198ff  open                           
-000199ad  lseek                          
-000199d1  close                          
-00019a21  add_device                     
-00019b95  __TI_cleanup                   
-00019bc1  freopen                        
-00019beb  fopen                          
-00019c91  fwrite                         
-00019dfd  ff_convert                     
-00019ea7  ff_wtoupper                    
-00019f01  __aeabi_dmul                   
-00019ffd  fread                          
-0001a0e9  setvbuf                        
-0001a1c5  __TI_doflush                   
-0001a211  fflush                         
-0001a28d  __TI_wrt_ok                    
-0001a2ef  __TI_rd_ok                     
-0001a339  __TI_buff_read                 
-0001a3d9  __aeabi_memcpy                 
-0001a3d9  __aeabi_memcpy4                
-0001a3d9  __aeabi_memcpy8                
-0001a3d9  memcpy                         
-0001a475  __TI_closefile                 
-0001a4db  fclose                         
-0001a50d  fputc                          
-0001a50d  putc                           
-0001a591  putchar                        
-0001a5a5  __aeabi_memclr                 
-0001a5a5  __aeabi_memclr4                
-0001a5a5  __aeabi_memclr8                
-0001a5a7  __aeabi_memset                 
-0001a5a7  __aeabi_memset4                
-0001a5a7  __aeabi_memset8                
-0001a5ad  memset                         
-0001a61f  __mpu_init                     
-0001a621  irinit                         
-0001a695  __TI_auto_init                 
-0001a705  __TI_decompress_lzss           
-0001a76d  __TI_writemsg                  
-0001a79b  C$$IO$$                        
-0001a79f  __TI_readmsg                   
-0001a7d5  fseek                          
-0001a839  _c_int00                       
-0001a88d  C$$EXIT                        
-0001a891  abort                          
-0001a899  exit                           
-0001a8e1  copy_in                        
-0001a92d  srand                          
-0001a943  rand                           
-0001a979  __aeabi_d2iz                   
-0001a9c1  strncpy                        
-0001a9f7  __aeabi_i2d                    
-0001aa25  memchr                         
-0001aa45  _args_main                     
-0001aa5d  strcmp                         
-0001aa75  strchr                         
-0001aa8b  _system_post_cinit             
-0001aa8d  SysTick_enableInterrupt        
-0001aaa1  SysTick_enableModule           
-0001aab5  _register_unlock               
-0001aabb  _register_lock                 
-0001aac3  _nop                           
-0001aac9  strcpy                         
-0001aadd  strlen                         
-0001ab01  defaultISR                     
-0001ab03  __TI_decompress_none           
-0001ab11  __time32                       
-0001ab11  time                           
-0001ab21  SysTick_setPeriod              
-0001ab2d  __TI_zero_init                 
-0001ab39  _system_pre_init               
-0001abe8  __TI_Handler_Table_Base        
-0001abf4  __TI_Handler_Table_Limit       
-0001ac00  __TI_CINIT_Base                
-0001ac10  __TI_CINIT_Limit               
+00014c85  f_sync                         
+00014d4d  f_close                        
+00014d7f  f_chdir                        
+00014df3  f_getcwd                       
+00014f63  f_lseek                        
+0001518b  f_opendir                      
+00015233  f_closedir                     
+00015255  f_readdir                      
+000152cd  f_stat                         
+00015321  f_getfree                      
+0001545d  f_truncate                     
+0001556b  f_unlink                       
+00015683  f_mkdir                        
+00015859  f_rename                       
+000159b5  f_chmod                        
+00015a4f  f_utime                        
+00015acb  f_getlabel                     
+00015bc7  f_setlabel                     
+00015e01  transmit                       
+00015e31  receive_response               
+00015e6b  receive_ff                     
+00015ea5  receive_multiple_bytes         
+00015f09  changeCRCcheck                 
+00015f41  readCID                        
+00015fd9  readSector                     
+000160e5  writeSector                    
+00016475  disk_initialize                
+00016717  disk_status                    
+0001673d  disk_read                      
+000167d5  disk_write                     
+000167fd  disk_ioctl                     
+00016b67  disk_timerproc                 
+00016bb9  SysTick_Handler                
+00016bc1  get_fattime                    
+00016bc5  min                            
+00016beb  decode                         
+00016ce7  getvolumerange                 
+00016ded  random_number                  
+00016e71  playmusic                      
+00016ff9  button_pressed                 
+00017461  main                           
+000175c9  PORT5_IRQHandler               
+000175c9  PORT5_IRQHandler               
+000177a3  Delayms                        
+000177c7  delay_ms                       
+00017809  readlcddata                    
+0001783f  lcdBusyWait                    
+0001787b  check_busy_flag                
+000178c3  putcommand                     
+000178f9  commandWrite                   
+00017931  putdata                        
+00017967  dataWrite                      
+0001798b  dataRead                       
+000179ab  lcdputch                       
+000179d9  lcdgotoaddr                    
+000179f9  lcdgotocgramaddr               
+00017a57  lcdputchcustom                 
+00017ab5  lcdputstr                      
+00017beb  lcdclear                       
+00017bfd  lcdmenu                        
+00017c2f  lcdscrolldown                  
+00017c6b  lcdreadtextfile                
+00017cd1  lcdpopulatefiles               
+00017da3  lcdinit                        
+00017e39  lcdcreatechar                  
+00017e9d  custom_char_play               
+00017f19  custom_char_pause              
+00017f71  custom_char_next               
+00017fe9  custom_char_prev               
+0001803d  custom_char_shuffle_on         
+00018095  custom_char_shuffle_off        
+000180ed  custom_char_loop               
+00018151  custom_char_loop_off           
+000181a5  delay                          
+000181c7  spiinit                        
+0001825f  WriteSpiByteSDI                
+0001828d  WriteSpiByte                   
+000182bd  ReadSpiByte                    
+000182f3  ReadSci                        
+0001837d  WriteSci                       
+000183d1  WriteSdi                       
+0001841d  SaveUIState                    
+0001841f  RestoreUIState                 
+00018421  GetUICommand                   
+00018425  ReadVS10xxMem32Counter         
+00018483  ReadVS10xxMem32                
+000184af  ReadVS10xxMem                  
+000184c7  WriteVS10xxMem                 
+000184e7  WriteVS10xxMem32               
+00018531  LoadPlugin                     
+000185e9  VS1063PlayFile                 
+000185f9  VS1063RecordFile               
+00018609  VSTestInitHardware             
+00018665  VSTestInitSoftware             
+00018721  VSTestHandleFile               
+00018745  SystemCoreClockUpdate          
+000189b9  SystemInit                     
+00018a6d  HOSTwrite                      
+00018ab9  HOSTunlink                     
+00018af1  HOSTtime64                     
+00018b3f  HOSTtime                       
+00018b79  HOSTrename                     
+00018bd7  HOSTread                       
+00018c23  HOSTopen                       
+00018c75  HOSTlseek                      
+00018cd1  HOSTgetenv                     
+00018d0f  HOSTclose                      
+00018d47  HOSTclock                      
+00018d91  ff_convert                     
+00018e3b  ff_wtoupper                    
+00018e95  __aeabi_memcpy                 
+00018e95  __aeabi_memcpy4                
+00018e95  __aeabi_memcpy8                
+00018e95  memcpy                         
+00018f35  irinit                         
+00018fad  __aeabi_memclr                 
+00018fad  __aeabi_memclr4                
+00018fad  __aeabi_memclr8                
+00018faf  __aeabi_memset                 
+00018faf  __aeabi_memset4                
+00018faf  __aeabi_memset8                
+00018fb5  memset                         
+00019027  __mpu_init                     
+00019029  __TI_auto_init                 
+00019099  __TI_decompress_lzss           
+00019101  __TI_writemsg                  
+0001912f  C$$IO$$                        
+00019133  __TI_readmsg                   
+00019169  _c_int00                       
+000191bd  C$$EXIT                        
+000191c1  abort                          
+000191c9  exit                           
+00019211  copy_in                        
+0001925d  srand                          
+00019273  rand                           
+000192a9  _args_main                     
+000192c1  SysTick_enableInterrupt        
+000192d5  SysTick_enableModule           
+000192e9  _register_unlock               
+000192ef  _register_lock                 
+000192f7  _nop                           
+000192fd  strcpy                         
+00019311  strlen                         
+00019335  defaultISR                     
+00019337  __TI_decompress_none           
+00019345  __time32                       
+00019345  time                           
+00019353  _system_post_cinit             
+00019355  SysTick_setPeriod              
+00019361  __TI_zero_init                 
+0001936d  _system_pre_init               
+000193b4  __TI_Handler_Table_Base        
+000193c0  __TI_Handler_Table_Limit       
+000193c8  __TI_CINIT_Base                
+000193d8  __TI_CINIT_Limit               
 20000000  File                           
 20000450  FatFs                          
-20000c88  __CIOBUF_                      
-20000da8  __TI_tmpnams                   
-20000e48  array                          
-20000ed0  Buff2                          
-20000f54  Buff                           
-20000fa5  vol_level                      
-20000fad  fres                           
-20000fb4  file_path                      
-20000fb8  s1                             
-20000fbc  playerState                    
-20000fc0  _sys_memory                    
-200017c0  _ftable                        
-20001980  data_byte                      
-20001984  button_type                    
-20001988  valid_button                   
-2000198c  irq_i                          
-20001990  data_received_flag             
-20001994  i                              
-20001998  start_flag                     
-2000199c  received_option                
-200019a0  ta_error                       
-200019a4  k                              
-200019a8  current_volume                 
-200019ac  read_mode                      
-200019b0  music_mode                     
-200019b4  is_paused                      
-200019b8  current_music_option           
-200019bc  music_play                     
-200019c0  menu                           
-200019c4  shuffle                        
-200019c8  loop                           
-200019cc  looped_song                    
-200019d0  systick_count                  
-200019d4  power                          
-200019d8  my_path                        
-200019dc  music_path                     
-200019e0  audioFormat                    
-200019f4  __TI_ft_end                    
-200019f8  __aeabi_stdin                  
-200019fc  __aeabi_stdout                 
-20001a00  __aeabi_stderr                 
-20001a04  __TI_cleanup_ptr               
-20001a08  __TI_dtors_ptr                 
-20001a0c  __TI_enable_exit_profile_output
-20001a1c  mp3                            
-20001a28  text                           
-20001a34  _lock                          
-20001a38  _unlock                        
-20001a3c  cnt                            
-20001a48  main_func_sp                   
-20001a4c  SystemCoreClock                
+20000688  receiveBuffer                  
+20000a8c  __CIOBUF_                      
+20000bac  array                          
+20000c34  Buff2                          
+20000cb8  Buff                           
+20000d09  vol_level                      
+20000d11  fres                           
+20000d18  file_path                      
+20000d1c  s1                             
+20000d20  data_byte                      
+20000d24  button_type                    
+20000d28  valid_button                   
+20000d2c  irq_i                          
+20000d30  data_received_flag             
+20000d34  i                              
+20000d38  start_flag                     
+20000d3c  received_option                
+20000d40  ta_error                       
+20000d44  k                              
+20000d48  current_volume                 
+20000d4c  read_mode                      
+20000d50  music_mode                     
+20000d54  is_paused                      
+20000d58  current_music_option           
+20000d5c  music_play                     
+20000d60  menu                           
+20000d64  shuffle                        
+20000d68  loop                           
+20000d6c  looped_song                    
+20000d70  systick_count                  
+20000d74  power                          
+20000d78  my_path                        
+20000d7c  music_path                     
+20000d80  __TI_cleanup_ptr               
+20000d84  __TI_dtors_ptr                 
+20000d88  __TI_enable_exit_profile_output
+20000d8c  mp3                            
+20000d98  text                           
+20000da4  _lock                          
+20000da8  _unlock                        
+20000dac  cnt                            
+20000db4  main_func_sp                   
+20000db8  SystemCoreClock                
 2000fe00  __stack                        
 20010000  __STACK_END                    
 4000480c  WDTCTL_SYM                     
@@ -796,4 +654,4 @@ ffffffff  binit
 UNDEFED   SHT$$INIT_ARRAY$$Base          
 UNDEFED   SHT$$INIT_ARRAY$$Limit         
 
-[263 symbols]
+[220 symbols]

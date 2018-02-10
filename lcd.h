@@ -1,7 +1,14 @@
+/*
+ * lcd.c header file declarations
+ * Authors: Lakhan Shiva Kamireddy, Dharmik Thakkar
+ * All the functions in this header file are a result of our own development effort
+ * */
 static void delay_us(int delay);
+void delay_ms(int delay_t);
 void Delayms(int delay);
 char readlcddata(void);
 void lcdBusyWait();
+void lcdclear();
 void putcommand(unsigned char x);
 void commandWrite(unsigned char cmd);
 void putdata(unsigned char x);

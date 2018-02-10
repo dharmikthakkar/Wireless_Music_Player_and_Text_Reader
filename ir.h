@@ -1,8 +1,7 @@
 /*
- * ir.h
- *
- *  Created on: Apr 30, 2017
- *      Author: lakhanshiva, dharmik
+ * Header file for ir.c
+ * Authors: Lakhan Shiva Kamireddy, Dharmik Thakkar
+ * All the functions are a result of our own development efforts
  */
 void irinit(void);
 uint16_t decode();

@@ -1,12 +1,15 @@
 /*
-
-  VLSI Solution generic microcontroller example player / recorder definitions.
-  v1.00.
-
-  See VS10xx AppNote: Playback and Recording for details.
-
-  v1.00 2012-11-23 HH  First release
-
+ * Authors: Lakhan Shiva Kamireddy, Dharmik Thakkar
+ * */
+/* All the functions in this are a result of our own development efforts,
+ * We are not using some functions at all in our project
+ * They are:
+ * void SaveUIState(void)
+ * void RestoreUIState(void)
+ * int GetUICommand(void)
+ * int VSTestHandleFile(const char *fileName, int record)
+ * These function names are same as generic library function names
+/*
 */
 #ifndef PLAYER_RECORDER_H
 #define PLAYER_RECORDER_H

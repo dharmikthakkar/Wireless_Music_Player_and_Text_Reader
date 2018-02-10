@@ -1,3 +1,4 @@
+/*These functions have been taken from CHAN's FAT file system library*/
 /*---------------------------------------------------------------------------/
 /  FatFs - FAT file system module configuration file
 /---------------------------------------------------------------------------*/

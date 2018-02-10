@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2017, Lakhan Kamireddy, Dharmik Thakkar
+ */
+
 #include "msp.h"
 
 /*FAT File system includes*/
@@ -31,46 +35,24 @@ static void delay_us(int delay){
     }
 }
 
+/*Generates a delay*/
 void Delayms(int delay){
     int i;
     for(i=0;i<delay; i++){
     }
 }
 
-/*
-
- generate approx 1.2 ms
-void delay_us(int delay_t_us){
-    int i=0, j=0;
-    for(i=0; i<delay_t_us; i++){
-        for(j=0; j<125; j++){
-
-        }
-    }
-}
-*/
 
 /* generates approx 1 ms */
 void delay_ms(int delay_t){
     int i=0, j=0;
     for(i=0; i<delay_t; i++){
-/*
-        TR0 = 0;
-        TF0 = 0;
-        TMOD = 0x01;
-        TL0 =  0x89;
-        TH0 = 0xFC;
-        TR0 = 1;
-        while(!TF0);
-        TR0 = 0;
-        TF0 = 0;
-*/
         for(j=0; j<121; j++);
     }
-
 }
 
 
+/*Reads LCD code*/
 unsigned char readlcddata(void){
     char c;
     P5->OUT |= BIT5; //Enable = 1
@@ -97,24 +79,16 @@ cmd = readlcddata();
 while((cmd & 0x80) == 0x80){ //checking if BF is set
     cmd = readlcddata();
     P5->OUT &= ~BIT5; //Enable = 0
-    /*P5->OUT |= BIT5; //Enable = 1
-    P5->OUT &= ~BIT5; //Enable = 0*/
-};
- /*unsigned int i;
- for(i=0; i<5000; i++){
-
- }*/
+	};
 }
 
 
 
-/* checks for busy flag */
+/* checks for lcd busy flag */
 void check_busy_flag(){
     volatile unsigned char temp;
     P5->OUT &= ~BIT0; //RS = 0 //command
     P5->OUT |=  BIT1; //RW = 1 //read
-   // delay_ms(5);
-    //check_busy_flag();
     do{
     temp = readlcddata();
     temp = temp & 0x80;
@@ -126,13 +100,11 @@ void check_busy_flag(){
 
 /*
     Name: putcommand()
-    Description: puts command to LCD address location 0x8000
+    Description: writes command to LCD
     Input: unsigned char
     Return value: void
 */
 void putcommand(unsigned char x){
-	//Using port 4 to put the word to LCD
-	//unsigned int i =0;
 	P5->OUT |= BIT5; //Enable = 1
 	Delayms(20);
 	P4->DIR = BIT0 | BIT1 | BIT2 | BIT3 | BIT4 | BIT5 | BIT6 | BIT7;
@@ -150,14 +122,6 @@ void putcommand(unsigned char x){
 void commandWrite(unsigned char cmd){
 	P5->OUT &= ~BIT0; //RS = 0
 	P5->OUT &= ~BIT1; //RW = 0
-	/*P5->OUT |= BIT5; //Enable = 1
-	Delayms(200);
-	P5->OUT &= ~BIT5; //Enable = 0
-	delay_us(2000);
-	P5->OUT |= BIT5; //Enable = 1
-	Delayms(200);*/
-	//P5->OUT &= ~BIT2; //Enable = 0
-
 	P5->OUT &= ~BIT0; //RS = 0 //command
 	P5->OUT &= ~BIT1; //RW = 0 //write
     //write command to lcd
@@ -166,13 +130,12 @@ void commandWrite(unsigned char cmd){
 
 /*
     Name: putdata()
-    Description: puts data to LCD address location 0xFF00
+    Description: puts data to LCD
     Input: unsigned char
     Return value: void
 */
 void putdata(unsigned char x){
 	//Using port 4 to put the word to LCD
-	//unsigned int i =0;
 	P5->OUT |= BIT5; //Enable = 1
 	Delayms(20);
 	P4->DIR = BIT0 | BIT1 | BIT2 | BIT3 | BIT4 | BIT5 | BIT6 | BIT7;
@@ -261,26 +224,16 @@ void lcdgotocgramaddr(unsigned char addr){
 
 /* Put custom character on LCD */
 void lcdputchcustom(unsigned char cc){
-   // check_busy_flag();
     delay_ms(20);
     P4->DIR = BIT0 | BIT1 | BIT2 | BIT3 | BIT4 | BIT5 | BIT6 | BIT7;
     P4->OUT = cc;
     P5->OUT |= BIT0; //RS = 0
-   // LCD_RW = 1;
-   // delay_ms(1);
     P5->OUT &= ~BIT1; //RW = 0
     delay_ms(2);
     P5->OUT |= BIT5; //Enable = 1
         Delayms(20);
         P5->OUT &= ~BIT5; //Enable = 0
-  //  delay_us(5);
-    //check_busy_flag();
-   // if(cc != '\0' && cc != '\r' && cc!= '\n'){
-
     Delayms(200);
-   // P5->OUT &= ~BIT5; //Enable = 0
-   // }
-
 }
 
 
@@ -333,20 +286,15 @@ void lcdputstr(char *str, unsigned char addr) {
     	            if(i!=0)
     	                lineNumber++;
     	            if(i % 64 == 0){
-    	                //lcdgotoaddr(0x00);
     	                lineNumber = 1;
     	            }
     	            if(lineNumber == 1){
-    	                //lcdgotoaddr(0x00);
     	            }
     	            else if(lineNumber == 2){
-    	                //lcdgotoaddr(0x40);
     	            }
     	            else if(lineNumber == 3){
-    	                //lcdgotoaddr(0x10);
     	            }
     	            else if(lineNumber == 4){
-    	                //lcdgotoaddr(0x50);
     	                lineNumber = 1;
     	            }
     	        }
@@ -355,17 +303,6 @@ void lcdputstr(char *str, unsigned char addr) {
     	        c=*(str+i);
     	    }
     }
-}
-
-void lcdmenu(){
-	//Puts the lcd menu which displays 1. Music 2. Text files
-	lcdclear();
-	lcdgotoaddr(0x00);
-	lcdputstr("A.Music", 0x00);
-	lcdgotoaddr(0x40);
-	lcdputstr("B.Text", 0x40);
-	lcdgotoaddr(0x10);
-	lcdputstr("C.Exit", 0x10);
 }
 
 /*
@@ -381,6 +318,24 @@ void lcdclear(){
 }
 
 /*
+    Name: lcdmenu()
+    Description: Displays menu for our application
+    Input: void
+    Return Value: void
+*/
+void lcdmenu(){
+	//Puts the lcd menu which displays A. Music B. Text files C. Exit
+	lcdclear();
+	lcdgotoaddr(0x00);
+	lcdputstr("A.Music", 0x00);
+	lcdgotoaddr(0x40);
+	lcdputstr("B.Text", 0x40);
+	lcdgotoaddr(0x10);
+	lcdputstr("C.Exit", 0x10);
+}
+
+
+/*
     Name: lcdscrolldown()
     Description: Scrolls down
     Input: void
@@ -392,8 +347,6 @@ void lcdscrolldown(void){
 	 	 if(fres || s1 == 0) return;
 	 	 	 lcdclear();
 	 		 lcdputstr(Buff, 0x00); //Displays the file on the LCD
-	 //  lcdputstr(page_number, 0x5F);
-	 //	 page_number++;
 }
 
 /*
@@ -403,9 +356,6 @@ void lcdscrolldown(void){
     Return Value: int
 */
 int lcdreadtextfile(unsigned int option){
-
-	//unsigned int page_number = 1;
-	unsigned int i=0;
 	if(option >= num_text){
 		return -1; //There are only num_text number of files
 	}
@@ -420,27 +370,16 @@ int lcdreadtextfile(unsigned int option){
 	 fres = f_read(&File[0], Buff,  60, &s1);
 	 lcdclear();
 	 lcdputstr(Buff, 0x00); //Displays the file on the LCD
-	 /*
-	 while(1){
-		 fres = f_read(&File[0], Buff,  60, &s1);
-	 	 cnt = cnt + s1;
-	 	 if(fres || s1 == 0) break;
-	 	 	 lcdclear();
-	 		 lcdputstr(Buff, 0x00); //Displays the file on the LCD
-	 //		 lcdputstr(page_number, 0x5F);
-	 	//	 page_number++;
-	 		 for(i=0; i<50; i++){
-	 		 Delayms(200000); //Gives a delay so that user could read the text on the LCD
-	 		 }
-
-	 	 }
-	 */
-	 //fres = f_read(&File[0], Buff, 10, &s1);
-	 //fres = f_close(&File[0]);
-
 	 return 0;
 }
 
+
+/*
+    Name: lcdpopulatefiles()
+    Description: Populates file names on LCD
+    Input: option
+    Return Value: void
+*/
 void lcdpopulatefiles(unsigned int option){
 	unsigned char addr1 =  0x08;
 	unsigned char addr2 =  0x48;
@@ -472,6 +411,12 @@ void lcdpopulatefiles(unsigned int option){
 }
 
 
+/*
+    Name: lcdinit()
+    Description: initializes the LCD
+    Input: void
+    Return Value: void
+*/
 void lcdinit(){
 	P5->DIR = BIT0 | BIT1 | BIT5;   //Sets P5.0,5.1, 5.5 as output pins
 	P4->DIR = 0xFF;
@@ -538,32 +483,21 @@ void lcdinit(){
 /* Create custom character */
 
 void lcdcreatechar(unsigned char ccode, unsigned char row_vals[], unsigned char lcd_addr){
-    unsigned char i, temp_addr=0;
-
-   // lcdgotoaddr(lcd_address);
-    //temp_addr = read_cursor_addr();
+    unsigned char i;
     lcdgotocgramaddr(ccode);
     for(i=0; i<8; i++){
         lcdputchcustom(row_vals[i]);
         delay_ms(2);
     }
 
-//    lcdgotoaddr(lcd_address);
-
     lcdgotoaddr(lcd_addr);
     delay_ms(20);
-
     lcdputchcustom(ccode);
-
     lcdgotoaddr(0x00);
-   // lcd_address++;
-   // wrap_cursor(temp_addr);
-   // lcdputch(ccode);
-
 }
 
 
-
+/* Create custom character for play*/
 void custom_char_play(unsigned char lcd_a){
     unsigned char char_code;
     unsigned char cgram_data[8];
@@ -581,7 +515,7 @@ void custom_char_play(unsigned char lcd_a){
 }
 
 
-
+/* Create custom character for pause*/
 void custom_char_pause(unsigned char lcd_a){
     unsigned char char_code;
     unsigned char cgram_data[8];
@@ -598,7 +532,7 @@ void custom_char_pause(unsigned char lcd_a){
     lcdcreatechar(char_code, cgram_data, lcd_a);
 }
 
-
+/* Create custom character for next*/
 void custom_char_next(unsigned char lcd_a){
     unsigned char char_code;
     unsigned char cgram_data[8];
@@ -615,7 +549,7 @@ void custom_char_next(unsigned char lcd_a){
     lcdcreatechar(char_code, cgram_data, lcd_a);
 }
 
-
+/* Create custom character for previous*/
 void custom_char_prev(unsigned char lcd_a){
     unsigned char char_code;
     unsigned char cgram_data[8];
@@ -632,7 +566,7 @@ void custom_char_prev(unsigned char lcd_a){
     lcdcreatechar(char_code, cgram_data, lcd_a);
 }
 
-
+/* Create custom character for shuffle ON*/
 void custom_char_shuffle_on(unsigned char lcd_a){
     unsigned char char_code;
     unsigned char cgram_data[8];
@@ -649,7 +583,7 @@ void custom_char_shuffle_on(unsigned char lcd_a){
     lcdcreatechar(char_code, cgram_data, lcd_a);
 }
 
-
+/* Create custom character for OFF*/
 void custom_char_shuffle_off(unsigned char lcd_a){
     unsigned char char_code;
     unsigned char cgram_data[8];
@@ -666,6 +600,7 @@ void custom_char_shuffle_off(unsigned char lcd_a){
     lcdcreatechar(char_code, cgram_data, lcd_a);
 }
 
+/* Create custom character for loop*/
 void custom_char_loop(unsigned char lcd_a){
     unsigned char char_code;
     unsigned char cgram_data[8];
@@ -682,6 +617,7 @@ void custom_char_loop(unsigned char lcd_a){
     lcdcreatechar(char_code, cgram_data, lcd_a);
 }
 
+/* Create custom character for loop OFF*/
 void custom_char_loop_off(unsigned char lcd_a){
     unsigned char char_code;
     unsigned char cgram_data[8];

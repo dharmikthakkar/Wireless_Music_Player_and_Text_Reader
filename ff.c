@@ -1,3 +1,4 @@
+/*These functions have been taken from Chan's open source libray, we have not implemented these for our project*/
 /*----------------------------------------------------------------------------/
 /  FatFs - Generic FAT file system module  R0.12c                             /
 /-----------------------------------------------------------------------------/
@@ -17,10 +18,15 @@
 / by use of this software.
 /----------------------------------------------------------------------------*/
 
-
 #include "ff.h"			/* Declarations of FatFs API */
 #include "diskio.h"		/* Declarations of device I/O functions */
 
+DRESULT disk_write (
+    BYTE drv,            /* Physical drive nmuber (0) */
+    const BYTE *buff,    /* Pointer to the data to be written */
+    DWORD sector,        /* Start sector number (LBA) */
+    BYTE count            /* Sector count (1..255) */
+);
 
 /*--------------------------------------------------------------------------
 

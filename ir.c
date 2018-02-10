@@ -1,8 +1,5 @@
 /*
- * ir.c
- *
- *  Created on: Apr 30, 2017
- *      Author: lakhanshiva, dharmik thakkar
+ *      IR initialization functions
  */
 #include "msp.h"
 #include <stdlib.h>

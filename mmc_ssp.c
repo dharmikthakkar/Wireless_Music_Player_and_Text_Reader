@@ -1,22 +1,5 @@
-/*------------------------------------------------------------------------*/
-/* LPCXpresso176x: MMCv3/SDv1/SDv2 (SPI mode) control module              */
-/*------------------------------------------------------------------------*/
-/*
-/  Copyright (C) 2015, ChaN, all right reserved.
-/
-/ * This software is a free software and there is NO WARRANTY.
-/ * No restriction on use. You can use, modify and redistribute it for
-/   personal, non-profit or commercial products UNDER YOUR RESPONSIBILITY.
-/ * Redistributions of source code must retain the above copyright notice.
-/
-/-------------------------------------------------------------------------*/
+/*We have written SPI transmit and receive drivers for communication between MSP432 and SD card*/
 
-//#define SSP_CH	1	/* SSP channel to use (0:SSP0, 1:SSP1) */
-
-//#define	CCLK		100000000UL	/* cclk frequency [Hz] */
-//#define PCLK_SSP	50000000UL	/* PCLK frequency for SSP [Hz] */
-//#define SCLK_FAST	25000000UL	/* SCLK frequency under normal operation [Hz] */
-//#define	SCLK_SLOW	400000UL	/* SCLK frequency under initialization [Hz] */
 /* DriverLib Includes */
 #include "driverlib.h"
 
@@ -26,56 +9,17 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include "sd.h"
+
+
+/*Global variable declaration*/
+uint8_t receiveBuffer[514];
 
 #define	MMC_CD		(!(FIO2PIN1 & _BV(1)))	/* Card detect (yes:true, no:false, default:true) */
 #define	MMC_WP		0						/* Write protected (yes:true, no:false, default:false) */
 
-//#if SSP_CH == 0
-//#define	SSPxDR		SSP0DR
-//#define	SSPxSR		SSP0SR
-//#define	SSPxCR0		SSP0CR0
-//#define	SSPxCR1		SSP0CR1
-//#define	SSPxCPSR	SSP0CPSR
-//#define	CS_LOW()	{FIO0CLR2 = _BV(0);}	/* Set P0.16 low */
-//#define	CS_HIGH()	{FIO0SET2 = _BV(0);}	/* Set P0.16 high */
-//#define PCSSPx		PCSSP0
-//#define	PCLKSSPx	PCLK_SSP0
-//#define ATTACH_SSP() {\
-		__set_PINSEL(0, 15, 2);	/* SCK0 */\
-		__set_PINSEL(0, 17, 2);	/* MISO0 */\
-		__set_PINSEL(0, 18, 2);	/* MOSI0 */\
-		FIO0DIR |= _BV(16);		/* CS# (P0.16) */\
-		}
-//#elif SSP_CH == 1
-//#define	SSPxDR		SSP1DR
-//#define	SSPxSR		SSP1SR
-//#define	SSPxCR0		SSP1CR0
-//#define	SSPxCR1		SSP1CR1
-//#define	SSPxCPSR	SSP1CPSR
 #define	CS_LOW()	{P3->OUT &=~ BIT0;}	/* Set P3.0 low */
 #define	CS_HIGH()	{P3->OUT |= BIT0;}   //Sets P3.0
-//#define PCSSPx		PCSSP1
-//#define	PCLKSSPx	PCLK_SSP1
-//#define ATTACH_SSP() {\
-		__set_PINSEL(0, 7, 2);	/* SCK1 */\
-		__set_PINSEL(0, 8, 2);	/* MISO1 */\
-		__set_PINSEL(0, 9, 2);	/* MOSI1 */\
-		FIO0DIR |= _BV(6);		/* CS# (P0.6) */\
-		}
-//#endif
-
-//#if PCLK_SSP * 1 == CCLK
-//#define PCLKDIV_SSP	PCLKDIV_1
-//#elif PCLK_SSP * 2 == CCLK
-//#define PCLKDIV_SSP	PCLKDIV_2
-//#elif PCLK_SSP * 4 == CCLK
-//#define PCLKDIV_SSP	PCLKDIV_4
-//#elif PCLK_SSP * 8 == CCLK
-//#define PCLKDIV_SSP	PCLKDIV_8
-//#else
-//#error Invalid clock frequency.
-//#endif
-
 
 #define FCLK_SLOW() { CS->KEY = CS_KEY_VAL;                             \
                       CS->CTL1 &= 0x8FFFFFFF;                           \
@@ -141,31 +85,172 @@ BYTE CardType;			/* Card type flags */
 
 
 
-/*-----------------------------------------------------------------------*/
-/* Send/Receive data to the MMC  (Platform dependent)                    */
-/*-----------------------------------------------------------------------*/
-
-
+/*Transmit data from MSP432 onto the SPI bus for the SD card*/
 void transmit(uint16_t txData){
-                  EUSCI_B2->IFG &=~ EUSCI_B_IFG_TXIFG;
-                  EUSCI_B2->TXBUF = txData;
-                  while(!(EUSCI_B2->IFG & EUSCI_B_IFG_TXIFG)){};
-                  EUSCI_B2->IFG &=~ EUSCI_B_IFG_TXIFG;
+  EUSCI_B2->IFG &=~ EUSCI_B_IFG_TXIFG;
+  EUSCI_B2->TXBUF = txData;
+  while(!(EUSCI_B2->IFG & EUSCI_B_IFG_TXIFG)){};
+  EUSCI_B2->IFG &=~ EUSCI_B_IFG_TXIFG;
 }
 
-
+/*Read data from the SPI bus for the SD card*/
 uint16_t receive_response(){
-                  uint16_t rxData;
-                  rxData = EUSCI_B2->RXBUF;
-                  while(!(EUSCI_B2->IFG & EUSCI_B_IFG_RXIFG) && (rxData==0xFF)){
-                      transmit(0xFF);
-                      rxData = EUSCI_B2->RXBUF;
-                  }
-                  EUSCI_B2->IFG &=~ EUSCI_B_IFG_RXIFG;
-                  return rxData;
+  uint16_t rxData;
+  rxData = EUSCI_B2->RXBUF;
+  while(!(EUSCI_B2->IFG & EUSCI_B_IFG_RXIFG) && (rxData==0xFF)){
+	  transmit(0xFF);
+	  rxData = EUSCI_B2->RXBUF;
+  }
+  EUSCI_B2->IFG &=~ EUSCI_B_IFG_RXIFG;
+  return rxData;
 }
 
+/*Waits for FF to appear on data line*/
+uint16_t receive_ff(){
+	uint16_t rxData;
+	rxData = EUSCI_B2->RXBUF;
+	while(!(EUSCI_B2->IFG & EUSCI_B_IFG_RXIFG) && (rxData!=0xFF)){
+		transmit(0xFF);
+		rxData = EUSCI_B2->RXBUF;
+	}
+	EUSCI_B2->IFG &=~ EUSCI_B_IFG_RXIFG;
+	return rxData;
+}
 
+/*Read multiple bytes from the SPI bus*/
+int receive_multiple_bytes(int len){
+
+  int i =0;
+  EUSCI_B2->IFG |= EUSCI_B_IFG_TXIFG;
+  for(i=0;i<len+2;i++){
+	  while(!(EUSCI_B2->IFG & EUSCI_B_IFG_TXIFG)){};
+	  EUSCI_B2->TXBUF = 0xFF;
+	  while(!(EUSCI_B2->IFG & EUSCI_B_IFG_RXIFG)){};
+	  receiveBuffer[i] = EUSCI_B2->RXBUF;
+  }
+  EUSCI_B2->IFG &=~ EUSCI_B_IFG_TXIFG;
+  EUSCI_B2->IFG &=~ EUSCI_B_IFG_RXIFG;
+  return len;
+
+}
+
+/*Turns of CRC check*/
+void changeCRCcheck(){
+	uint16_t received_data;
+	transmit(0x007B);
+	transmit(0x0000);
+	transmit(0x0000);
+	transmit(0x0000);
+	transmit(0x0000);
+	transmit(0x0000);
+	received_data = receive_response(); //response R1
+	received_data = receive_ff();
+}
+
+/*Read the CID register of the SD card*/
+void readCID(){//to read the card CID
+	uint16_t received_data;
+	uint16_t cid_buffer[8];
+	int i = 7, j=0;
+	transmit(0x4A);
+	transmit(0x00);
+	transmit(0x00);
+	transmit(0x00);
+	transmit(0x00);
+	//transmit(0xFF);
+	received_data = receive_response();//this should be 0x00, put breakpoint after this line
+	while(received_data != 0xFE){ //read until 0xFE is received - this is read token
+		received_data = receive_response();
+	}
+	//get 16 bytes from CID
+	delay_ms(60);
+	j = 0;
+	receive_multiple_bytes(8);
+	for(i=7;i<=0;i--){
+		cid_buffer[i]=receiveBuffer[j];
+		j++;
+	}
+	received_data = receive_ff();
+	delay_ms(60);
+}
+
+/*Reads a sector from SD card*/
+void readSector(uint32_t address){
+		int i = 0;
+		int length;
+		uint16_t received_data;
+		uint8_t crc_low_byte;
+		uint8_t crc_high_byte;
+		uint8_t read_buffer[512];
+		uint8_t low_byte_low_add = 0x000000FF & address;
+		address >>= 8;
+		uint8_t low_byte_high_add = 0x000000FF & address;
+		address >>= 8;
+		uint8_t high_byte_low_add = 0x000000FF & address;
+		address >>= 8;
+		uint8_t high_byte_high_add = 0x000000FF & address;
+		transmit(0x51);
+		transmit(high_byte_high_add);
+		transmit(high_byte_low_add);
+		transmit(low_byte_high_add);
+		transmit(low_byte_low_add);
+		transmit(0xFF);
+		delay_ms(5);
+		received_data = receive_response();//this should be 0x00, put breakpoint after this line
+		while(received_data != 0xFE){ //read until 0xFE is received - this is read token
+				received_data = receive_response();
+		}
+		delay_ms(60);
+		length = 512;
+		receive_multiple_bytes(512);
+		for(i=0;i<512;i++){
+				read_buffer[i] =receiveBuffer[i];
+		}
+		crc_low_byte = receiveBuffer[i++];
+		crc_high_byte = receiveBuffer[i++];
+		received_data = receive_ff();
+}
+
+/*Function to perform a single sector write*/
+void writeSector(uint32_t address, uint8_t data){
+	uint16_t received_data;
+	int i =0;
+	uint8_t low_byte_low_add = 0x000000FF & address;
+	address >>= 8;
+	uint8_t low_byte_high_add = 0x000000FF & address;
+	address >>= 8;
+	uint8_t high_byte_low_add = 0x000000FF & address;
+	address >>= 8;
+	uint8_t high_byte_high_add = 0x000000FF & address;
+	transmit(0x58);
+	transmit(high_byte_high_add);
+	transmit(high_byte_low_add);
+	transmit(low_byte_high_add);
+	transmit(low_byte_low_add);
+	transmit(0x00);
+	delay_ms(60);
+	received_data = receive_ff();
+	received_data = receive_response();//this should be 0x00, put breakpoint after this line
+	transmit(0xFF); //one byte gap
+	transmit(0xFF);
+	transmit(0xFE); //send data token
+	for(i=0;i<512;i++){
+		transmit(data); //this is the data i am writing to this sector
+		data += 1;
+	}
+	//send two byte CRC
+	transmit(0x00); //send low CRC byte
+	transmit(0x00); //send high CRC byte
+	received_data = receive_response(); /*data response byte of the format xxx0sss1. Here xxx0 aren’t used,
+	bit 4 is zero, bits 3:1 (sss) hold the status code.
+	: 010 = Data accepted
+    : 101 = Data rejected due to CRC error
+    : 110 = Data rejected due to write error and bit 0 is a one.*/
+	while(received_data == 0x00){ //read while busy, wait for non zero byte to be returned
+		received_data = receive_response();
+	}
+	received_data = receive_ff();
+}
 
 
 /* Exchange a byte */
@@ -174,9 +259,6 @@ BYTE xchg_spi (
 	BYTE dat	/* Data to send */
 )
 {
-//	SSPxDR = dat;
-//	while (SSPxSR & 0x10) ;
-//	return SSPxDR;
     uint32_t ui32RcvDat;
 
     /* Send a dummy. */
@@ -186,12 +268,6 @@ BYTE xchg_spi (
     ui32RcvDat = EUSCI_B2->RXBUF;
 
      return (BYTE)ui32RcvDat;
-
-
-
-
-
-
 }
 
 static
@@ -208,56 +284,13 @@ BYTE rcvr_spi (void)
      return (BYTE)ui32RcvDat;
 }
 
+/*receive spi*/
 static
 void rcvr_spi_m (BYTE *dst)
 {
     *dst = rcvr_spi();
 
 }
-
-/* Receive multiple byte */
-static
-void rcvr_spi_multi (
-	BYTE *buff,		/* Pointer to data buffer */
-	UINT btr		/* Number of bytes to receive (16, 64 or 512) */
-)
-{
-	UINT n;
-//	WORD d;
-
-	for(n=0; n<btr; n++){
-	    *(buff+n) = rcvr_spi();
-	}
-
-
-/*
-	SSPxCR0 = 0x000F;				 Select 16-bit mode
-
-	for (n = 0; n < 8; n++)			 Push 8 frames into pipeline
-		SSPxDR = 0xFFFF;
-	btr -= 16;
-
-	while (btr >= 2) {				 Receive the data block into buffer
-		btr -= 2;
-		while (!(SSPxSR & _BV(2))) ;
-		d = SSPxDR;
-		SSPxDR = 0xFFFF;
-		*buff++ = d >> 8;
-		*buff++ = d;
-	}
-
-	for (n = 0; n < 8; n++) {		 Pop remaining frames from pipeline
-		while (!(SSPxSR & _BV(2))) ;
-		d = SSPxDR;
-		*buff++ = d >> 8;
-		*buff++ = d;
-	}
-
-	SSPxCR0 = 0x0007;				 Select 8-bit mode
-*/
-}
-
-
 
 /*-----------------------------------------------------------------------*/
 /* Wait for card ready                                                   */
@@ -293,7 +326,6 @@ static
 void deselect (void)
 {
 	CS_HIGH();		/* CS = H */
-	//xchg_spi(0xFF);	/* Dummy clock (force DO hi-z for multiple slave SPI) */
 }
 
 
@@ -306,31 +338,15 @@ static
 int select (void)	/* 1:OK, 0:Timeout */
 {
 	CS_LOW();		/* CS = L */
-	//xchg_spi(0xFF);	/* Dummy clock (force DO enabled) */
-
-	//if (wait_ready(500)) return 1;	/* Leading busy check: Wait for card ready */
-
-	//deselect();		/* Timeout */
 	return 1;
 }
 
 
 
-/*-----------------------------------------------------------------------*/
-/* Control SPI module (Platform dependent)                               */
-/*-----------------------------------------------------------------------*/
-
+/*MSP432 SPI control functions*/
 static
 void power_on (void)	/* Enable SSP module and attach it to I/O pads */
 {
-
-//	__set_PCONP(PCSSPx, 1);	/* Enable SSP module */
-//	__set_PCLKSEL(PCLKSSPx, PCLKDIV_SSP);	/* Select PCLK frequency for SSP */
-//	SSPxCR0 = 0x0007;		/* Set mode: SPI mode 0, 8-bit */
-//	SSPxCR1 = 0x2;			/* Enable SSP with Master */
-//	ATTACH_SSP();			/* Attach SSP module to I/O pads */
-//	CS_HIGH();				/* Set CS# high */
-
 
     // Configure SPI
     EUSCI_B2->CTLW0 = 0;
@@ -352,17 +368,13 @@ void power_on (void)	/* Enable SSP module and attach it to I/O pads */
     //restart the state machine
     EUSCI_B2->CTLW0 &= ~(UCSWRST);
 
-    //enable interrupts
-   // UCB2IE |= UCTXIE;
-    //UCB2IE |= UCRXIE;
-    //Configuring the CS GPIO pin
-        P3->DIR |= BIT0;   //Sets P3.0 as an output pin
+    P3->DIR |= BIT0;   //Sets P3.0 as an output pin
 
     CS_HIGH();
-	//for (Timer1 = 10; Timer1; ) ;	/* 10ms */
 }
 
 
+/*Power off SD card*/
 static
 void power_off (void)		/* Disable SPI function */
 {
@@ -393,9 +405,6 @@ int rcvr_datablock (	/* 1:OK, 0:Error */
 
 	} while ((token == 0xFF) && Timer1);
 	if(token != 0xFE) return 0;		/* Function fails if invalid DataStart token or timeout */
-
-	//rcvr_spi_multi(buff, btr);		/* Store trailing data to the buffer */
-//	xchg_spi(0xFF); xchg_spi(0xFF);	/* Discard CRC */
 
     do {                            /* Receive the data block into buffer */
         rcvr_spi_m(buff++);
@@ -452,12 +461,6 @@ BYTE send_cmd (		/* Return value: R1 resp (bit7==1:Failed to send) */
 	for(n=0; n<250; n++);
 
 	if (cmd == CMD12) xchg_spi(0xFF);	 //Diacard following one byte when CMD12
-/*
-	n = 10;								 Wait for response (10 bytes max)
-	do
-		res = xchg_spi(0xFF);
-	while ((res & 0x80) && --n);
-*/
 	res = receive_response();
 
 	return res;							/* Return received response */
@@ -473,16 +476,14 @@ BYTE send_cmd (		/* Return value: R1 resp (bit7==1:Failed to send) */
 
 ---------------------------------------------------------------------------*/
 
-
-/*-----------------------------------------------------------------------*/
-/* Initialize disk drive                                                 */
-/*-----------------------------------------------------------------------*/
-
+/*
+ * Initializes SD card for use in SPI
+ */
 DSTATUS disk_initialize (
 	BYTE drv		/* Physical drive number (0) */
 )
 {
-	BYTE n, cmd, ty, ocr[4], received_data;
+	BYTE n, cmd, ty, ocr[4];
 	WORD i, j;
 
 
@@ -492,7 +493,6 @@ DSTATUS disk_initialize (
 	if (Stat & STA_NODISK) return Stat;	/* Is a card existing in the soket? */
 
 	FCLK_SLOW();
-	//for (n =0; n<10; n++) xchg_spi(0xFF);	/* Send 80 dummy clocks */
     for(i=0;i<3000;i++){};
     while(1){
 //To put the SD card into SPI mode, we make MOSI as logic 1 and CS as logic 1 for 74 cycles (or more)
@@ -511,20 +511,6 @@ DSTATUS disk_initialize (
         }
     }
       EUSCI_B2->IFG &=~ EUSCI_B_IFG_RXIFG;
-/*
-
-      deselect();
-      select();
-      transmit(0x0040);
-        transmit(0x0000);
-        transmit(0x0000);
-        transmit(0x0000);
-        transmit(0x0000);
-        transmit(0x0095);
-        received_data = receive_response();//this should be 0x01 in hex, put the breakpoint after this line
-*/
-
-
 	ty = 0;
 	if (send_cmd(CMD0, 0) == 1) {			/* Put the card SPI state */
 		Timer1 = 1000;						/* Initialization timeout = 1 sec */
@@ -610,8 +596,6 @@ DRESULT disk_read (
 	return count ? RES_ERROR : RES_OK;	/* Return result */
 }
 
-
-
 /*-----------------------------------------------------------------------*/
 /* Write Sector(s)                                                       */
 /*-----------------------------------------------------------------------*/
@@ -624,44 +608,10 @@ DRESULT disk_write (
     BYTE count            /* Sector count (1..255) */
 )
 {
-/*
-    if (drv || !count) return RES_PARERR;
-    if (Stat & STA_NOINIT) return RES_NOTRDY;
-    if (Stat & STA_PROTECT) return RES_WRPRT;
-
-    if (!(CardType & 4)) sector *= 512;     Convert to byte address if needed
-
-    SELECT();             CS = L
-
-    if (count == 1) {     Single block write
-        if ((send_cmd(CMD24, sector) == 0)     WRITE_BLOCK
-            && xmit_datablock(buff, 0xFE))
-            count = 0;
-    }
-    else {                 Multiple block write
-        if (CardType & 2) {
-            send_cmd(CMD55, 0); send_cmd(CMD23, count);     ACMD23
-        }
-        if (send_cmd(CMD25, sector) == 0) {     WRITE_MULTIPLE_BLOCK
-            do {
-                if (!xmit_datablock(buff, 0xFC)) break;
-                buff += 512;
-            } while (--count);
-            if (!xmit_datablock(0, 0xFD))     STOP_TRAN token
-                count = 1;
-        }
-    }
-
-    DESELECT();             CS = H
-    rcvr_spi();             Idle (Release DO)
-*/
-
- //   return count; ? RES_ERROR : RES_OK;
+  //We are not using this function in our project
 return 0;
 }
 #endif /* _READONLY */
-
-
 
 /*-----------------------------------------------------------------------*/
 /* Miscellaneous drive controls other than data read/write               */
@@ -826,27 +776,9 @@ DRESULT disk_ioctl (
 void disk_timerproc (void)
 {
 	WORD n;
-	BYTE s;
-
-
 	n = Timer1;						/* 1kHz decrement timer stopped at 0 */
 	if (n) Timer1 = --n;
 	n = Timer2;
 	if (n) Timer2 = --n;
-/*
-
-	s = Stat;
-	if (MMC_WP) {	 Write protected
-		s |= STA_PROTECT;
-	} else {		 Write enabled
-		s &= ~STA_PROTECT;
-	}
-	if (MMC_CD) {	 Card is in socket
-		s &= ~STA_NODISK;
-	} else {		 Socket empty
-		s |= (STA_NODISK | STA_NOINIT);
-	}
-	Stat = s;
-*/
 }
 

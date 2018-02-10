@@ -1,3 +1,4 @@
+/*These functions have been taken from CHAN's FAT file system library*/
 /*-------------------------------------------*/
 /* Integer type definitions for FatFs module */
 /*-------------------------------------------*/
