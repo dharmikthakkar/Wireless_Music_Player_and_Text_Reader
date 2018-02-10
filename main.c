@@ -74,10 +74,54 @@
 #include "vs1063_uc.h"
 #include "player.h"
 
-//Reset P6.0
-//DREQ P6.5
-//CS P3.2
-//BSYNC P6.4
+/*LCD includes*/
+#include "lcd.h"
+
+/*IR Decoder library*/
+#include "ir.h"
+
+/*IR Remote Macros*/
+const uint16_t BUTTON_POWER = 0xD827; // i.e. 0x10EFD827
+const uint16_t BUTTON_A = 0xF807;
+const uint16_t BUTTON_B = 0x7887;
+const uint16_t BUTTON_C = 0x58A7;
+const uint16_t BUTTON_UP = 0xA05F;
+const uint16_t BUTTON_DOWN = 0x00FF;
+const uint16_t BUTTON_LEFT = 0x10EF;
+const uint16_t BUTTON_RIGHT = 0x807F;
+const uint16_t BUTTON_CIRCLE = 0x20DF;
+
+#define detect_0 0
+#define detect_1 1
+#define detect_start 2
+#define detect_repeat 3
+#define detect_undefined 4
+
+/*Global Variables for IR Decoder*/
+uint32_t data_byte = 0x00;
+uint16_t button_type = 0x00;
+int valid_button = 0;
+int irq_i = 0;
+int array[34];
+int data_received_flag = 0;
+volatile int i = 0;
+volatile unsigned int start_flag = 0;
+uint16_t received_option = 0x00;
+int ta_error = 0;
+int k =0;
+
+/*LCD read variables*/
+int read_mode = 0; //when read_mode is 1, user is reading a file.
+int music_mode = 0;//when music_mode is 1, user is listening to music
+int is_paused = 0;//when is paused is 1, user has paused the song that he is currently listening to
+int current_music_option = 0; //music options
+/*
+ * Pin Configurations on our board
+ *Reset P6.0
+DREQ P6.5
+CS P3.2
+BSYNC P6.4
+ */
 
 
 extern void disk_timerproc (void);
@@ -96,6 +140,7 @@ FIL File[2];                /* File objects */
 DIR Dir;                    /* Directory object */
 FIL my_fil;
 const TCHAR *my_path = "test1.txt";
+const TCHAR *music_path = "test1.txt";
 UINT s1;
 
 volatile UINT Timer;
@@ -198,6 +243,102 @@ unsigned char min(unsigned char x, unsigned char y){
     else return x;
 }
 
+/*IR decoding logic*/
+
+uint16_t decode(){
+	int j;
+	for(j=0;j<32;j++){
+		//decode each bit
+		if(array[j] > 800 && array[j] < 2500){
+					//This is a 0 bit
+					data_byte |= detect_0;
+				}
+		else if(array[j] > 3000 && array[j] < 5500){
+					//This is a 1 bit
+					data_byte |= detect_1;
+				}
+		else{
+					//unable to decode the bit
+				}
+		if(j<31){
+			data_byte <<= 1;
+		}
+	}
+	if((data_byte & 0xFFFF0000) >> 16 == 0x10EF){
+		/*Just like the OLD TV remotes, if the button press is detected we glow the LED*/
+		button_type = data_byte & 0x0000FFFF;
+		data_byte = 0x00;
+		valid_button = 0;
+		P1->OUT &= ~BIT0;
+	}
+	else{
+		button_type = 0x0000;
+		valid_button = -1;
+	}
+    irq_i =0;
+    data_received_flag = 0;
+    P5->IE = BIT7; //Enable interrupt
+    NVIC->ISER[1] = 1 << ((PORT5_IRQn) & 31);
+	return button_type;
+}
+
+int playmusic(int option){
+	FRESULT fres;
+	unsigned int cnt = 0;
+	UINT s2;
+	int result_codec=0;
+	unsigned short reg[16];
+
+	if(option == 0){
+		music_path = "bird.wav";
+	}
+	else if(option == 1){
+		music_path = "cat.wav";
+	}
+	else if(option == 2){
+		music_path = "rooster.wav";
+	}
+	else{
+		music_path = "bird.wav";
+	}
+								 WriteSci(SCI_DECODE_TIME, 0);         // Reset DECODE_TIME
+				                 EUSCI_B0->IFG |= EUSCI_B_IFG_TXIFG;
+				                 fres = f_open(&File[1], music_path, FA_READ);
+				                 cnt = 0;
+				                 P6->OUT |= BIT4;
+				                 while(1){
+				                     fres = f_read(&File[1], Buff2,  128, &s2);
+				                     cnt = cnt + s2;
+				                     if(fres || s2 == 0) break;
+				                     P3->OUT |= BIT2; //Deactivate CS - make it high
+				                     //CS->KEY = CS_KEY_VAL;
+				                     //CS->CTL1 &= 0x8FFFFFFF;
+				                     //CS->CTL1 |= (CS_CTL1_SELS_3 | CS_CTL1_DIVS_1);
+				                     //EUSCI_B0->CTLW0 |= EUSCI_B_CTLW0_SWRST;
+				                     //EUSCI_B0->BRW =1;
+				                     //EUSCI_B0->CTLW0 &=~ EUSCI_B_CTLW0_SWRST;
+				                     //CS->KEY = 0;
+
+				                     for(i=0; i<4; i++){
+				                         result_codec = WriteSdi(Buff2+(i*32), min(32, s2));
+				   //                      reg[8]=ReadSci(SCI_HDAT0);
+				   //                      reg[9]=ReadSci(SCI_HDAT1);
+
+				                     }
+				                     while(!(EUSCI_B0->IFG & EUSCI_B_IFG_TXIFG)){};
+
+				                     P3->OUT &=~ BIT2; //Activate CS - make it low
+				                     reg[8]=ReadSci(SCI_HDAT0);
+				                     reg[9]=ReadSci(SCI_HDAT1);
+				                 }
+
+				                     fres = f_close(&File[1]);
+				                     //  P6->OUT |= BIT4;
+				                     WriteSci(SCI_MODE, SM_CANCEL);
+				                     WriteSci(SCI_MODE, SM_SDINEW|SM_SDISHARE|SM_TESTS|SM_RESET);
+				                     return 0;
+}
+
 
 int main(void)
 {
@@ -232,6 +373,8 @@ int main(void)
           CS->CTL1 |= (CS_CTL1_SELS_3 | CS_CTL1_DIVS_1); //// For SMCLK = 12Mhz, select DCO as source then divide by 2
           CS->KEY = 0;                            // Lock CS module from unintended accesses
 
+          P1->DIR |= BIT0; //Set GPIO Pin as output
+          P1->OUT &= ~BIT0; //Make the GPIO pin low.
 
           /* initialize systick timer */
 
@@ -242,6 +385,14 @@ int main(void)
           SysTick_enableModule();
           SysTick_enableInterrupt();
 
+          //LCD initialization
+          lcdinit();
+          lcdmenu();
+          lcdpopulatefiles(1);
+          //lcdreadtextfile(1);
+
+          /*IR decoding initialization*/
+          irinit();
 
           // Configure SPI
           EUSCI_B2->CTLW0 = 0;
@@ -263,9 +414,6 @@ int main(void)
           //restart the state machine
           EUSCI_B2->CTLW0 &= ~(UCSWRST);
 
-          //enable interrupts
-         // UCB2IE |= UCTXIE;
-          //UCB2IE |= UCRXIE;
           //Configuring the CS GPIO pin
               P3->DIR |= BIT0;   //Sets P3.0 as an output pin
 
@@ -294,11 +442,12 @@ int main(void)
               reg[14]=ReadSci(SCI_AICTRL2);
               reg[15]=ReadSci(SCI_AICTRL3);
 
+              fres = f_mount(&FatFs, "", 1);
 
 
 
 
-
+/*
           if(error_flag != -1){
     //power_on();
               fres = f_mount(&FatFs, "", 1);
@@ -351,9 +500,110 @@ int main(void)
             //  P6->OUT |= BIT4;
               WriteSci(SCI_MODE, SM_CANCEL);
           }
-   while(1);
+*/
+   while(1){
+	   if(data_received_flag == 1){
+		   received_option = decode();
+		   if(received_option == 0xF807){ //option A is chosen
+			   //play a song
+			   lcdclear();
+			   lcdputstr("Playing music...", 0x00);
+			   music_mode = 1;
+			   playmusic(0);
+		   }
+		   else if(received_option == 0x7887){
+			   //read a text file
+			   lcdclear();
+			   lcdputstr("Reading text file...",0x00);
+			   //Delayms();
+			   read_mode = 1;
+			   lcdreadtextfile(1);
+		   }
+		   else if(received_option == 0x58A7){
+			   //exit to menu
+			   read_mode = 0;
+			   music_mode = 0;
+			   lcdmenu();
+			   lcdpopulatefiles(1);
+		   }
+		   else if(received_option == 0xA05F){
+			   //scroll up
+			   if(music_mode == 1){
+				   //increase the volume
+
+			   }
+		   }
+		   else if(received_option == 0x00FF){
+			   //scroll down
+			   if(read_mode == 1){
+				   lcdscrolldown();
+			   }
+			   else if(music_mode == 1){
+				   //decrease the volume
+			   }
+		   }
+		   else if(received_option == 0x807F){
+			   //play next
+			  if(music_mode == 1){
+				   lcdputstr("Playing next song...", 0x00);
+				   			   music_mode = 1;
+				   			   if(current_music_option >=3){
+				   				   current_music_option = 0;
+				   			   }
+				   			   else{
+				   				   current_music_option++;
+				   			   }
+				   			   playmusic(current_music_option);
+
+			   }
+		   }//end of else if
+	   }
+   }//end of while
     return 0;
 }
+
+//PORT 5 interrupt handler service routine
+void PORT5_IRQHandler(void){
+	 P5->IE &= ~BIT7; //Disable interrupts
+		    P5->IFG &= ~ BIT7; //Disable interrupt flag
+		    NVIC->ICER[1] = 1 << ((PORT5_IRQn) & 31);
+		    TIMER_A0->CTL |= TIMER_A_CTL_MC_0; //Halting the timer
+		    TIMER_A0->CTL = TIMER_A_CTL_CLR; //making timer register 0
+		    TIMER_A0->CTL = TIMER_A_CTL_TASSEL_2 |  TIMER_A_CTL_ID_2;             //Divide 12MHz by 4 // SMCLK , 12 MHz
+		    TIMER_A0->CTL |= TIMER_A_CTL_MC_2; //Starts timer in Continuous mode (count till FFFFh)
+		    while(!(P5->IN & BIT7)){
+		        if(TA0R > 30000){
+		            break;
+		        }
+		    }
+		    k=TA0R;
+		    if( k<=31500 && k>= 15000){
+		        TIMER_A0->CTL = TIMER_A_CTL_MC_0; //Halting the timer
+		        TIMER_A0->CTL = TIMER_A_CTL_CLR; //making timer register 0
+		        TIMER_A0->CTL = TIMER_A_CTL_TASSEL_2 | TIMER_A_CTL_ID_2;             //Divide 12MHz by 4 // SMCLK , 12 MHz
+		        TIMER_A0->CTL |= TIMER_A_CTL_MC_2; //Starts timer in Continuous mode (count till FFFFh)
+		        while((P5->IN & BIT7));         // WAIT FOR START CONDITION TO END
+		        k=TA0R;
+		        if(k > 9000 && k<16000){
+		            for(i=0; i<32; i++){
+		            while(!(P5->IN & BIT7)); // WAIT FOR BIT TO START
+		            TIMER_A0->CTL = TIMER_A_CTL_MC_0; //Halting the timer
+		            TIMER_A0->CTL = TIMER_A_CTL_CLR; //making timer register 0
+		            TIMER_A0->CTL = TIMER_A_CTL_TASSEL_2 |  TIMER_A_CTL_ID_2;             //Divide 12MHz by 4// SMCLK , 12 MHz
+		            TIMER_A0->CTL |= TIMER_A_CTL_MC_2; //Starts timer in Continuous mode (count till FFFFh)
+		            while((P5->IN & BIT7)); // WAIT FOR BIT TO END
+		           // TIMER_A0->CTL = TIMER_A_CTL_MC_0; //Halting the timer
+		            array[i] = TIMER_A0->R;
+		            //for(k=0; k<10; k++);
+		            }
+		            data_received_flag = 1;
+		        }
+		    }
+		    P5->IE |= BIT7; //Disable interrupts
+		    P5->IFG &= ~ BIT7; //Disable interrupt flag
+		    NVIC->ISER[1] = 1 << ((PORT5_IRQn) & 31);
+}
+
 
 
 

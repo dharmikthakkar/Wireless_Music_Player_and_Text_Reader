@@ -1,6 +1,24 @@
 #include "msp.h"
 
+/*FAT File system includes*/
+#include "diskio.h"
+#include "ff.h"
+//#include "fatfs/ffconf.h"
+#include "integer.h"
 
+FATFS FatFs;                /* File system object for each logical drive */
+FIL File[2];                /* File objects */
+FRESULT fres;
+BYTE Buff[64] __attribute__ ((aligned (4))) ;    /* Working buffer */
+UINT s1;
+
+#define num_text 3
+#define num_mp3 3
+char * text[num_text] = {"test1", "story1", "text3"};
+char * mp3[num_mp3] = {"mp3_1", "mp3_2", "mp3_3"};
+
+const TCHAR *file_path;
+unsigned int cnt = 0;
 /*
     Name: delay_us()
     Description: Delays in micro seconds
@@ -242,31 +260,115 @@ void lcdputstr(char *str, unsigned char addr) {
 
 void lcdmenu(){
 	//Puts the lcd menu which displays 1. Music 2. Text files
+	lcdclear();
 	lcdgotoaddr(0x00);
-	lcdputstr("1.Music", 0x00);
+	lcdputstr("A.Music", 0x00);
 	lcdgotoaddr(0x40);
-	lcdputstr("2.Text", 0x40);
+	lcdputstr("B.Text", 0x40);
+	lcdgotoaddr(0x10);
+	lcdputstr("C.Exit", 0x10);
+}
+
+/*
+    Name: lcdclear()
+    Description: Clears the LCD display
+    Input: void
+    Return Value: void
+*/
+void lcdclear(){
+    lcdBusyWait();
+    //lcd clear command
+    commandWrite(0x01);
+}
+
+/*
+    Name: lcdscrolldown()
+    Description: Scrolls down
+    Input: void
+    Return Value: void
+*/
+void lcdscrolldown(void){
+		 fres = f_read(&File[0], Buff,  60, &s1);
+	 	 cnt = cnt + s1;
+	 	 if(fres || s1 == 0) return;
+	 	 	 lcdclear();
+	 		 lcdputstr(Buff, 0x00); //Displays the file on the LCD
+	 //  lcdputstr(page_number, 0x5F);
+	 //	 page_number++;
+}
+
+/*
+    Name: lcdreadtextfile()
+    Description: Displays the text file on the lcd
+    Input: option for text file
+    Return Value: int
+*/
+int lcdreadtextfile(unsigned int option){
+
+	//unsigned int page_number = 1;
+	unsigned int i=0;
+	if(option >= num_text){
+		return -1; //There are only num_text number of files
+	}
+	if(option == 0 ){
+		file_path = "test1.txt";
+	}
+	else if(option == 1){
+		file_path = "story1.txt";
+	}
+	 fres = f_mount(&FatFs, "", 1);
+	 fres = f_open(&File[0], file_path, FA_READ);
+	 fres = f_read(&File[0], Buff,  60, &s1);
+	 lcdclear();
+	 lcdputstr(Buff, 0x00); //Displays the file on the LCD
+	 /*
+	 while(1){
+		 fres = f_read(&File[0], Buff,  60, &s1);
+	 	 cnt = cnt + s1;
+	 	 if(fres || s1 == 0) break;
+	 	 	 lcdclear();
+	 		 lcdputstr(Buff, 0x00); //Displays the file on the LCD
+	 //		 lcdputstr(page_number, 0x5F);
+	 	//	 page_number++;
+	 		 for(i=0; i<50; i++){
+	 		 Delayms(200000); //Gives a delay so that user could read the text on the LCD
+	 		 }
+
+	 	 }
+	 */
+	 //fres = f_read(&File[0], Buff, 10, &s1);
+	 //fres = f_close(&File[0]);
+
+	 return 0;
 }
 
 void lcdpopulatefiles(unsigned int option){
+	unsigned char addr1 =  0x08;
+	unsigned char addr2 =  0x48;
+	unsigned char addr3 =  0x18;
+	unsigned int i=0;
 	//populate the LCD filenames on the LCD
 	if(option == 1){
 		//if the option is 1, then populate music files on the LCD
-		lcdgotoaddr(0x08);
-		lcdputstr("test1",0x08);
-		lcdgotoaddr(0x48);
-		lcdputstr("test2",0x48);
-		lcdgotoaddr(0x18);
-		lcdputstr("test3",0x18);
+		lcdgotoaddr(addr1);
+		lcdputstr(text[i],addr1);
+		i++;
+		lcdgotoaddr(addr2);
+		lcdputstr(text[i],addr2);
+		i++;
+		lcdgotoaddr(addr3);
+		lcdputstr(text[i],addr3);
 	}
 	else if(option == 2){
 		//if the option is 2, then populate music files on the LCD
-		lcdgotoaddr(0x08);
-		lcdputstr("mp3_1",0x08);
-		lcdgotoaddr(0x48);
-		lcdputstr("mp3_2",0x48);
-		lcdgotoaddr(0x18);
-		lcdputstr("mp3_3",0x18);
+		lcdgotoaddr(addr1);
+		lcdputstr(mp3[i],addr1);
+		i++;
+		lcdgotoaddr(addr2);
+		lcdputstr(mp3[i],addr2);
+		i++;
+		lcdgotoaddr(addr3);
+		lcdputstr(mp3[i],addr3);
 	}
 }
 

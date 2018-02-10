@@ -57,7 +57,7 @@ extern unsigned long __STACK_END;
 /* External declarations for the interrupt handlers used by the application. */
 
 extern void SysTick_Handler(void);
-
+extern void PORT5_IRQHandler    (void) __attribute__((weak,alias("defaultISR")));
 
 /* To be added by user */
 
@@ -125,7 +125,7 @@ void (* const interruptVectors[])(void) =
     defaultISR,                             /* PORT2 ISR                 */
     defaultISR,                             /* PORT3 ISR                 */
     defaultISR,                             /* PORT4 ISR                 */
-    defaultISR,                             /* PORT5 ISR                 */
+	PORT5_IRQHandler,                             /* PORT5 ISR                 */
     defaultISR,                             /* PORT6 ISR                 */
     defaultISR,                             /* Reserved 41               */
     defaultISR,                             /* Reserved 42               */
