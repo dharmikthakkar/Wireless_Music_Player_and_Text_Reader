@@ -13,6 +13,9 @@ ORDERED_OBJS += \
 "./main.o" \
 "./startup_msp432p401m_gcc.o" \
 "./system_msp432p401m.o" \
+"./fatfs/ff.o" \
+"./fatfs/option/syscall.o" \
+"./fatfs/option/unicode.o" \
 -Wl,-T"../msp432p401m.lds" \
 $(GEN_CMDS__FLAG) \
 -Wl,--start-group \
@@ -29,7 +32,11 @@ RMDIR := RMDIR /S/Q
 # All of the sources participating in the build are defined here
 -include sources.mk
 -include subdir_vars.mk
+-include fatfs/subdir_vars.mk
+-include fatfs/option/subdir_vars.mk
 -include subdir_rules.mk
+-include fatfs/subdir_rules.mk
+-include fatfs/option/subdir_rules.mk
 -include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)
@@ -158,8 +165,8 @@ SDController.hex: $(EXE_OUTPUTS)
 # Other Targets
 clean:
 	-$(RM) $(EXE_OUTPUTS__QUOTED)$(BIN_OUTPUTS__QUOTED)
-	-$(RM) "main.d" "startup_msp432p401m_gcc.d" "system_msp432p401m.d" 
-	-$(RM) "main.o" "startup_msp432p401m_gcc.o" "system_msp432p401m.o" 
+	-$(RM) "main.d" "startup_msp432p401m_gcc.d" "system_msp432p401m.d" "fatfs\ff.d" "fatfs\option\syscall.d" "fatfs\option\unicode.d" 
+	-$(RM) "main.o" "startup_msp432p401m_gcc.o" "system_msp432p401m.o" "fatfs\ff.o" "fatfs\option\syscall.o" "fatfs\option\unicode.o" 
 	-@echo 'Finished clean'
 	-@echo ' '
 
