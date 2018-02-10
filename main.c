@@ -74,6 +74,8 @@
 #include "vs1063_uc.h"
 #include "player.h"
 
+#define VOL_DIFF 500;
+
 /*LCD includes*/
 #include "lcd.h"
 
@@ -109,6 +111,8 @@ volatile unsigned int start_flag = 0;
 uint16_t received_option = 0x00;
 int ta_error = 0;
 int k =0;
+unsigned char current_volume = 0x2424;
+char vol_level[3]; //volume level
 
 /*LCD read variables*/
 int read_mode = 0; //when read_mode is 1, user is reading a file.
@@ -247,39 +251,70 @@ unsigned char min(unsigned char x, unsigned char y){
 
 uint16_t decode(){
 	int j;
-	for(j=0;j<32;j++){
-		//decode each bit
-		if(array[j] > 800 && array[j] < 2500){
-					//This is a 0 bit
-					data_byte |= detect_0;
-				}
-		else if(array[j] > 3000 && array[j] < 5500){
-					//This is a 1 bit
-					data_byte |= detect_1;
-				}
-		else{
-					//unable to decode the bit
-				}
-		if(j<31){
-			data_byte <<= 1;
+	if(data_received_flag){
+		for(j=0;j<32;j++){
+			//decode each bit
+			if(array[j] > 800 && array[j] < 2500){
+						//This is a 0 bit
+						data_byte |= detect_0;
+						array[j] = 0;
+					}
+			else if(array[j] > 3000 && array[j] < 5500){
+						//This is a 1 bit
+						data_byte |= detect_1;
+						array[j] = 0;
+					}
+			else{
+						//unable to decode the bit
+					}
+			if(j<31){
+				data_byte <<= 1;
+			}
 		}
+		if((data_byte & 0xFFFF0000) >> 16 == 0x10EF){
+			button_type = data_byte & 0x0000FFFF;
+			data_byte = 0x00;
+			valid_button = 0;
+			P1->OUT &= ~BIT0;
+		}
+		else{
+			button_type = 0x0000;
+			valid_button = -1;
+		}
+		irq_i =0;
+		data_received_flag = 0;
+		P5->IE = BIT7; //Enable interrupt
+		NVIC->ISER[1] = 1 << ((PORT5_IRQn) & 31);
+		return button_type;
 	}
-	if((data_byte & 0xFFFF0000) >> 16 == 0x10EF){
-		/*Just like the OLD TV remotes, if the button press is detected we glow the LED*/
-		button_type = data_byte & 0x0000FFFF;
-		data_byte = 0x00;
-		valid_button = 0;
-		P1->OUT &= ~BIT0;
+	else return 0;
+}
+
+void getvolumerange(){
+	if(current_volume >= 0x0000 && current_volume <= 0x1000){
+		vol_level[0] = '6';
+		vol_level[1] = '\0';
+	}
+	else if(current_volume > 0x1000 && current_volume <= 0x2000){
+		vol_level[0] = '5';
+		vol_level[1] = '\0';
+	}
+	else if(current_volume > 0x2000 && current_volume <= 0x3000){
+		vol_level[0] = '4';
+		vol_level[1] = '\0';
+	}
+	else if(current_volume > 0x3000 && current_volume <= 0x4000){
+		vol_level[0] = '3';
+		vol_level[1] = '\0';
+	}
+	else if(current_volume > 0x4000 && current_volume <= 0x5000){
+		vol_level[0] = '2';
+		vol_level[1] = '\0';
 	}
 	else{
-		button_type = 0x0000;
-		valid_button = -1;
+		vol_level[0] = '1';
+		vol_level[1] = '\0';
 	}
-    irq_i =0;
-    data_received_flag = 0;
-    P5->IE = BIT7; //Enable interrupt
-    NVIC->ISER[1] = 1 << ((PORT5_IRQn) & 31);
-	return button_type;
 }
 
 int playmusic(int option){
@@ -311,19 +346,25 @@ int playmusic(int option){
 				                     cnt = cnt + s2;
 				                     if(fres || s2 == 0) break;
 				                     P3->OUT |= BIT2; //Deactivate CS - make it high
-				                     //CS->KEY = CS_KEY_VAL;
-				                     //CS->CTL1 &= 0x8FFFFFFF;
-				                     //CS->CTL1 |= (CS_CTL1_SELS_3 | CS_CTL1_DIVS_1);
-				                     //EUSCI_B0->CTLW0 |= EUSCI_B_CTLW0_SWRST;
-				                     //EUSCI_B0->BRW =1;
-				                     //EUSCI_B0->CTLW0 &=~ EUSCI_B_CTLW0_SWRST;
-				                     //CS->KEY = 0;
 
 				                     for(i=0; i<4; i++){
-				                         result_codec = WriteSdi(Buff2+(i*32), min(32, s2));
-				   //                      reg[8]=ReadSci(SCI_HDAT0);
-				   //                      reg[9]=ReadSci(SCI_HDAT1);
+				                    	 while(1){
+				                    		 if(data_received_flag == 1 || is_paused){//if the song is paused, it will enter this while loop
 
+				                    			 received_option = decode();
+				                    			 if(received_option == 0x20DF){
+				                    			 			   if(is_paused) {
+				                    			 				   is_paused = 0;
+				                    			 				   break;
+				                    			 			   }
+				                    			 			   else is_paused = 1;
+				                    			  }
+				                    		 }
+				                    		 else{
+				                    			 break;
+				                    		 }
+				                    	 }
+				                         result_codec = WriteSdi(Buff2+(i*32), min(32, s2));
 				                     }
 				                     while(!(EUSCI_B0->IFG & EUSCI_B_IFG_TXIFG)){};
 
@@ -389,7 +430,6 @@ int main(void)
           lcdinit();
           lcdmenu();
           lcdpopulatefiles(1);
-          //lcdreadtextfile(1);
 
           /*IR decoding initialization*/
           irinit();
@@ -444,63 +484,6 @@ int main(void)
 
               fres = f_mount(&FatFs, "", 1);
 
-
-
-
-/*
-          if(error_flag != -1){
-    //power_on();
-              fres = f_mount(&FatFs, "", 1);
-              fres = f_open(&File[0], my_path, FA_READ);
-              fres = f_read(&File[0], Buff, 10, &s1);
-              fres = f_close(&File[0]);
-             // WriteSci(SCI_VOL, 0x0101);
-              WriteSci(SCI_DECODE_TIME, 0);         // Reset DECODE_TIME
-              EUSCI_B0->IFG |= EUSCI_B_IFG_TXIFG;
-              fres = f_open(&File[1], "bird.wav", FA_READ);
-              cnt = 0;
-              P6->OUT |= BIT4;
-              while(1){
-                  fres = f_read(&File[1], Buff2,  128, &s2);
-                  cnt = cnt + s2;
-                  if(fres || s2 == 0) break;
-                  P3->OUT |= BIT2; //Activate CS - make it low
-                  //CS->KEY = CS_KEY_VAL;
-                  //CS->CTL1 &= 0x8FFFFFFF;
-                  //CS->CTL1 |= (CS_CTL1_SELS_3 | CS_CTL1_DIVS_1);
-                  //EUSCI_B0->CTLW0 |= EUSCI_B_CTLW0_SWRST;
-                  //EUSCI_B0->BRW =1;
-                  //EUSCI_B0->CTLW0 &=~ EUSCI_B_CTLW0_SWRST;
-                  //CS->KEY = 0;
-
-                  for(i=0; i<4; i++){
-                      result_codec = WriteSdi(Buff2+(i*32), min(32, s2));
-//                      reg[8]=ReadSci(SCI_HDAT0);
-//                      reg[9]=ReadSci(SCI_HDAT1);
-
-                  }
-                  while(!(EUSCI_B0->IFG & EUSCI_B_IFG_TXIFG)){};
-
-                  P3->OUT &=~ BIT2; //Activate CS - make it low
-                  reg[8]=ReadSci(SCI_HDAT0);
-                  reg[9]=ReadSci(SCI_HDAT1);
-
-                  //CS->KEY = CS_KEY_VAL;
-                  //CS->CTL1 &= 0x8FFFFFFF;
-                  //CS->CTL1 |= (CS_CTL1_SELS_3 | CS_CTL1_DIVS_1);
-                  //EUSCI_B2->CTLW0 |= EUSCI_B_CTLW0_SWRST;
-                  //EUSCI_B2->BRW =9;
-                  //EUSCI_B2->CTLW0 &=~ EUSCI_B_CTLW0_SWRST;
-                  //CS->KEY = 0;
-
-
-              }
-
-              fres = f_close(&File[1]);
-            //  P6->OUT |= BIT4;
-              WriteSci(SCI_MODE, SM_CANCEL);
-          }
-*/
    while(1){
 	   if(data_received_flag == 1){
 		   received_option = decode();
@@ -511,7 +494,7 @@ int main(void)
 			   music_mode = 1;
 			   playmusic(0);
 		   }
-		   else if(received_option == 0x7887){
+		   else if(received_option == 0x7887){ //option B is chosen
 			   //read a text file
 			   lcdclear();
 			   lcdputstr("Reading text file...",0x00);
@@ -519,10 +502,11 @@ int main(void)
 			   read_mode = 1;
 			   lcdreadtextfile(1);
 		   }
-		   else if(received_option == 0x58A7){
+		   else if(received_option == 0x58A7){ //option C is chosen
 			   //exit to menu
 			   read_mode = 0;
 			   music_mode = 0;
+			   is_paused = 0;
 			   lcdmenu();
 			   lcdpopulatefiles(1);
 		   }
@@ -530,7 +514,12 @@ int main(void)
 			   //scroll up
 			   if(music_mode == 1){
 				   //increase the volume
-
+				   P3->OUT &= ~ BIT2;
+				   current_volume = current_volume - VOL_DIFF;
+				   getvolumerange();
+				   lcdputstr(vol_level,0x1A);
+				   WriteSci(SCI_VOL, current_volume);
+				   P3->OUT |=  BIT2;
 			   }
 		   }
 		   else if(received_option == 0x00FF){
@@ -540,6 +529,12 @@ int main(void)
 			   }
 			   else if(music_mode == 1){
 				   //decrease the volume
+				   P3->OUT &= ~ BIT2;
+				   current_volume = current_volume + VOL_DIFF;
+				   getvolumerange();
+				   lcdputstr(vol_level,0x1A);
+				   WriteSci(SCI_VOL, current_volume);
+				   P3->OUT |=  BIT2;
 			   }
 		   }
 		   else if(received_option == 0x807F){
@@ -557,6 +552,10 @@ int main(void)
 
 			   }
 		   }//end of else if
+		   else if(received_option == 0x20DF){
+			   if(is_paused) is_paused = 0;
+			   else is_paused = 1;
+		   }
 	   }
    }//end of while
     return 0;
@@ -592,9 +591,7 @@ void PORT5_IRQHandler(void){
 		            TIMER_A0->CTL = TIMER_A_CTL_TASSEL_2 |  TIMER_A_CTL_ID_2;             //Divide 12MHz by 4// SMCLK , 12 MHz
 		            TIMER_A0->CTL |= TIMER_A_CTL_MC_2; //Starts timer in Continuous mode (count till FFFFh)
 		            while((P5->IN & BIT7)); // WAIT FOR BIT TO END
-		           // TIMER_A0->CTL = TIMER_A_CTL_MC_0; //Halting the timer
 		            array[i] = TIMER_A0->R;
-		            //for(k=0; k<10; k++);
 		            }
 		            data_received_flag = 1;
 		        }
