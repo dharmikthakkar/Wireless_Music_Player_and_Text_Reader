@@ -74,7 +74,7 @@
 #include "vs1063_uc.h"
 #include "player.h"
 
-#define VOL_DIFF 0x500;
+#define VOL_DIFF 0x1000;
 
 /*LCD includes*/
 #include "lcd.h"
@@ -119,6 +119,13 @@ int read_mode = 0; //when read_mode is 1, user is reading a file.
 int music_mode = 0;//when music_mode is 1, user is listening to music
 int is_paused = 0;//when is paused is 1, user has paused the song that he is currently listening to
 int current_music_option = 0; //music options
+int music_play = 0;
+int menu = 0;
+int shuffle = 0;
+int loop = 0;
+int looped_song = 0;
+int systick_count = 0;
+int power=0;
 /*
  * Pin Configurations on our board
  *Reset P6.0
@@ -142,6 +149,7 @@ FATFS FatFs;                /* File system object for each logical drive */
 FIL File[2];                /* File objects */
 DIR Dir;                    /* Directory object */
 FIL my_fil;
+FRESULT fres;
 const TCHAR *my_path = "test1.txt";
 const TCHAR *music_path = "test1.txt";
 UINT s1;
@@ -155,8 +163,12 @@ volatile UINT Timer;
 
 void SysTick_Handler (void)
 {
-
+//    systick_count++;
     disk_timerproc();   /* Disk timer process */
+//    if(systick_count == 10){
+//        button_pressed();
+//        systick_count = 0;
+//    }
 }
 
 
@@ -295,32 +307,63 @@ void getvolumerange(){
 	vol_level[2] = 'L';
 	vol_level[3] = ':';
 	vol_level[5] = '\0';
-	if(current_volume >= 0x0000 && current_volume <= 0x1000){
+	if(current_volume >= 0x0424 && current_volume < 0x1424){
+		vol_level[4] = '7';
+	}
+	else if(current_volume >= 0x1424 && current_volume < 0x2424){
 		vol_level[4] = '6';
 	}
-	else if(current_volume > 0x1000 && current_volume <= 0x2000){
+	else if(current_volume >= 0x2424 && current_volume < 0x3424){
 		vol_level[4] = '5';
 	}
-	else if(current_volume > 0x2000 && current_volume <= 0x3000){
+	else if(current_volume >= 0x3424 && current_volume < 0x4424){
 		vol_level[4] = '4';
 	}
-	else if(current_volume > 0x3000 && current_volume <= 0x4000){
+	else if(current_volume >= 0x4424 && current_volume < 0x5424){
 		vol_level[4] = '3';
 	}
-	else if(current_volume > 0x4000 && current_volume <= 0x5000){
-		vol_level[4] = '2';
-	}
+    else if(current_volume >= 0x5424 && current_volume < 0x6424){
+        vol_level[4] = '2';
+    }
+    else if(current_volume >= 0x6424 && current_volume < 0x7424){
+        vol_level[4] = '1';
+    }
 	else{
-		vol_level[4] = '1';
+		vol_level[4] = '0';
 	}
 }
 
+int random_number(int min_num, int max_num)
+{
+    int result = 0, low_num = 0, hi_num = 0;
+
+    if (min_num < max_num)
+    {
+        low_num = min_num;
+        hi_num = max_num + 1; // include max_num in output
+    } else {
+        low_num = max_num + 1; // include max_num in output
+        hi_num = min_num;
+    }
+
+    srand(time(NULL));
+    result = (rand() % (hi_num - low_num)) + low_num;
+    return result;
+}
+
 int playmusic(int option){
-	FRESULT fres;
+
 	unsigned int cnt = 0;
 	UINT s2;
 	int result_codec=0;
 	unsigned short reg[16];
+
+	if(shuffle){
+	    option = random_number(0,2);
+	}
+    if(loop){
+        option = looped_song;
+    }
 
 	if(option == 0){
 		music_path = "bird.wav";
@@ -344,8 +387,10 @@ int playmusic(int option){
 				                     cnt = cnt + s2;
 				                     if(fres || s2 == 0) break;
 				                     P3->OUT |= BIT2; //Deactivate CS - make it high
-
+				                     music_play = 1;
 				                     for(i=0; i<4; i++){
+				                         button_pressed();
+/*
 				                    	 while(1){
 				                    		 if(data_received_flag == 1 || is_paused){//if the song is paused, it will enter this while loop
 
@@ -382,20 +427,201 @@ int playmusic(int option){
 				                    			 break;
 				                    		 }
 				                    	 }
+*/
 				                         result_codec = WriteSdi(Buff2+(i*32), min(32, s2));
 				                     }
 				                     while(!(EUSCI_B0->IFG & EUSCI_B_IFG_TXIFG)){};
 
 				                     P3->OUT &=~ BIT2; //Activate CS - make it low
-				                     reg[8]=ReadSci(SCI_HDAT0);
-				                     reg[9]=ReadSci(SCI_HDAT1);
+				                    // reg[8]=ReadSci(SCI_HDAT0);
+				                     //reg[9]=ReadSci(SCI_HDAT1);
 				                 }
+				                 music_play = 0;
 
 				                     fres = f_close(&File[1]);
 				                     //  P6->OUT |= BIT4;
 				                     WriteSci(SCI_MODE, SM_CANCEL);
 				                     WriteSci(SCI_MODE, SM_SDINEW|SM_SDISHARE|SM_TESTS|SM_RESET);
 				                     return 0;
+}
+
+void button_pressed(){
+    if(data_received_flag == 1){
+        received_option = decode();
+        if(received_option == 0xF807){ //option A is chosen
+            //play a song
+            if(menu == 1 && music_mode == 0){
+                lcdclear();
+                lcdputstr("Playing music...", 0x00);
+                custom_char_play(0x14);
+                custom_char_prev(0x12);
+                custom_char_next(0x16);
+                custom_char_shuffle_off(0x10);
+                custom_char_loop_off(0x18);
+                getvolumerange();
+                lcdputstr(vol_level,0x1A);
+                music_mode = 1;
+                menu = 0;
+                playmusic(0);
+            }
+            else if(shuffle==1 && menu == 0 && music_mode == 1 ){
+                custom_char_shuffle_off(0x10);
+                shuffle = 0;
+            }
+            else if(shuffle==0 && menu == 0 && music_mode == 1 ){
+                shuffle = 1;
+                custom_char_shuffle_on(0x10);
+            }
+
+        }
+        else if(received_option == 0x7887){ //option B is chosen
+            //read a text file
+            if(menu == 1){
+                lcdclear();
+                lcdputstr("Reading text file...",0x00);
+                //Delayms();
+                read_mode = 1;
+                menu = 0;
+                lcdreadtextfile(1);
+            }
+            else if(loop==1 && menu == 0 && music_mode == 1 ){
+                custom_char_loop_off(0x18);
+                loop = 0;
+            }
+            else if(loop==0 && menu == 0 && music_mode == 1 ){
+                loop = 1;
+                looped_song =  current_music_option;
+                custom_char_loop(0x18);
+            }
+
+        }
+        else if(received_option == 0x58A7){ //option C is chosen
+            //exit to menu
+            if(menu == 0){
+                if(music_play == 1){
+                    music_play = 0;
+                    fres = f_close(&File[1]);
+                    //  P6->OUT |= BIT4;
+                    WriteSci(SCI_MODE, SM_CANCEL);
+                    WriteSci(SCI_MODE, SM_SDINEW|SM_SDISHARE|SM_TESTS|SM_RESET);
+
+                }
+                read_mode = 0;
+                music_mode = 0;
+                is_paused = 0;
+                lcdmenu();
+                lcdpopulatefiles(1);
+                menu =1;
+            }
+        }
+        else if(received_option == 0xA05F){
+            //scroll up
+            if(music_mode == 1 && menu == 0){
+                //increase the volume
+                P3->OUT &= ~ BIT2;
+                if(current_volume != 0x424){
+                    current_volume = current_volume - VOL_DIFF;
+                    if(current_volume > 0x7424){
+                        current_volume = 0x7424;
+                    }
+                    getvolumerange();
+                    lcdputstr(vol_level,0x1A);
+                    WriteSci(SCI_VOL, current_volume);
+                    k = ReadSci(SCI_VOL);
+                    P3->OUT |=  BIT2;
+                }
+            }
+        }
+        else if(received_option == 0x00FF){
+            //scroll down
+            if(read_mode == 1 && menu ==0){
+                lcdscrolldown();
+            }
+            else if(music_mode == 1 && menu == 0){
+                //decrease the volume
+                P3->OUT &= ~ BIT2;
+                current_volume = current_volume + VOL_DIFF;
+                if(current_volume > 0x7424){
+                    current_volume = 0x7424;
+                }
+
+                getvolumerange();
+                lcdputstr(vol_level,0x1A);
+                WriteSci(SCI_VOL, current_volume);
+                k = ReadSci(SCI_VOL);
+                P3->OUT |=  BIT2;
+            }
+        }
+        else if(received_option == 0x807F){
+            //play next
+           if(music_mode == 1 && menu == 0){
+                lcdputstr("Playing next song...", 0x00);
+                            music_mode = 1;
+                            custom_char_shuffle_off(0x16);
+                            delay_ms(2);
+                            custom_char_next(0x16);
+
+                            if(current_music_option >=2){
+                                current_music_option = 0;
+                            }
+                            else{
+                                current_music_option++;
+                            }
+                            playmusic(current_music_option);
+
+            }
+        }//end of else if
+        else if(received_option == 0x10EF){
+                    //play previous
+                   if(music_mode == 1  && menu == 0){
+                        lcdputstr("Playing previous song...", 0x00);
+                                    music_mode = 1;
+                                    custom_char_shuffle_off(0x12);
+                                    delay_ms(2);
+                                    custom_char_prev(0x12);
+                                    if(current_music_option <=0){
+                                        current_music_option = 2;
+                                    }
+                                    else{
+                                        current_music_option--;
+                                    }
+                                    playmusic(current_music_option);
+
+                    }
+        }//end of else if
+        else if(received_option == 0x20DF){
+            if(is_paused && menu == 0 && music_play == 1 ){
+                custom_char_play(0x14);
+                is_paused = 0;
+            }
+            else if(is_paused==0 && menu == 0 && music_play == 1 ){
+                is_paused = 1;
+                custom_char_pause(0x14);
+                while(1){
+                    button_pressed();
+                    if(!is_paused){
+                        custom_char_play(0x14);
+                        break;
+                    }
+                }
+            }
+        }
+/*        else if(received_option == BUTTON_POWER){
+            if(power==1){
+                custom_char_loop_off(0x18);
+                power = 0;
+                lcdmenu();
+                lcdpopulatefiles(1);
+
+            }
+            else if(power==0){
+                power = 1;
+                lcdclear();
+                __sleep();
+                button_pressed();
+            }
+        }*/
+    }
 }
 
 
@@ -446,6 +672,7 @@ int main(void)
 
           //LCD initialization
           lcdinit();
+          menu = 1;
           lcdmenu();
           lcdpopulatefiles(1);
 
@@ -475,6 +702,10 @@ int main(void)
           //Configuring the CS GPIO pin
               P3->DIR |= BIT0;   //Sets P3.0 as an output pin
 
+
+         //     SCB->SCR |= SCB_SCR_SLEEPONEXIT_Msk;    // Enable sleep on exit from ISR
+
+
               if (VSTestInitHardware() || VSTestInitSoftware()) {
               //printf("Failed initializing VS10xx, exiting\n");
               //exit(EXIT_FAILURE);
@@ -503,93 +734,7 @@ int main(void)
               fres = f_mount(&FatFs, "", 1);
 
    while(1){
-	   if(data_received_flag == 1){
-		   received_option = decode();
-		   if(received_option == 0xF807){ //option A is chosen
-			   //play a song
-			   lcdclear();
-			   lcdputstr("Playing music...", 0x00);
-			   music_mode = 1;
-			   playmusic(0);
-		   }
-		   else if(received_option == 0x7887){ //option B is chosen
-			   //read a text file
-			   lcdclear();
-			   lcdputstr("Reading text file...",0x00);
-			   //Delayms();
-			   read_mode = 1;
-			   lcdreadtextfile(1);
-		   }
-		   else if(received_option == 0x58A7){ //option C is chosen
-			   //exit to menu
-			   read_mode = 0;
-			   music_mode = 0;
-			   is_paused = 0;
-			   lcdmenu();
-			   lcdpopulatefiles(1);
-		   }
-		   else if(received_option == 0xA05F){
-			   //scroll up
-			   if(music_mode == 1){
-				   //increase the volume
-				   P3->OUT &= ~ BIT2;
-				   current_volume = current_volume - VOL_DIFF;
-				   getvolumerange();
-				   lcdputstr(vol_level,0x1A);
-				   WriteSci(SCI_VOL, current_volume);
-				   P3->OUT |=  BIT2;
-			   }
-		   }
-		   else if(received_option == 0x00FF){
-			   //scroll down
-			   if(read_mode == 1){
-				   lcdscrolldown();
-			   }
-			   else if(music_mode == 1){
-				   //decrease the volume
-				   P3->OUT &= ~ BIT2;
-				   current_volume = current_volume + VOL_DIFF;
-				   getvolumerange();
-				   lcdputstr(vol_level,0x1A);
-				   WriteSci(SCI_VOL, current_volume);
-				   P3->OUT |=  BIT2;
-			   }
-		   }
-		   else if(received_option == 0x807F){
-			   //play next
-			  if(music_mode == 1){
-				   lcdputstr("Playing next song...", 0x00);
-				   			   music_mode = 1;
-				   			   if(current_music_option >=2){
-				   				   current_music_option = 0;
-				   			   }
-				   			   else{
-				   				   current_music_option++;
-				   			   }
-				   			   playmusic(current_music_option);
-
-			   }
-		   }//end of else if
-		   else if(received_option == 0x10EF){
-		   			   //play next
-		   			  if(music_mode == 1){
-		   				   lcdputstr("Playing previous song...", 0x00);
-		   				   			   music_mode = 1;
-		   				   			   if(current_music_option <=0){
-		   				   				   current_music_option = 2;
-		   				   			   }
-		   				   			   else{
-		   				   				   current_music_option--;
-		   				   			   }
-		   				   			   playmusic(current_music_option);
-
-		   			   }
-		   }//end of else if
-		   else if(received_option == 0x20DF){
-			   if(is_paused) is_paused = 0;
-			   else is_paused = 1;
-		   }
-	   }
+       button_pressed();
    }//end of while
     return 0;
 }
@@ -626,7 +771,9 @@ void PORT5_IRQHandler(void){
 		            while((P5->IN & BIT7)); // WAIT FOR BIT TO END
 		            array[i] = TIMER_A0->R;
 		            }
+
 		            data_received_flag = 1;
+		        //    button_pressed();
 		        }
 		    }
 		    P5->IE |= BIT7; //Disable interrupts

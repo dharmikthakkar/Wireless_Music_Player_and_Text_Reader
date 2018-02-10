@@ -14,8 +14,8 @@ UINT s1;
 
 #define num_text 3
 #define num_mp3 3
-char * text[num_text] = {"test1", "story1", "text3"};
-char * mp3[num_mp3] = {"mp3_1", "mp3_2", "mp3_3"};
+unsigned char * text[num_text] = {"test1", "story1", "text3"};
+unsigned char * mp3[num_mp3] = {"mp3_1", "mp3_2", "mp3_3"};
 
 const TCHAR *file_path;
 unsigned int cnt = 0;
@@ -37,7 +37,41 @@ void Delayms(int delay){
     }
 }
 
-char readlcddata(void){
+/*
+
+ generate approx 1.2 ms
+void delay_us(int delay_t_us){
+    int i=0, j=0;
+    for(i=0; i<delay_t_us; i++){
+        for(j=0; j<125; j++){
+
+        }
+    }
+}
+*/
+
+/* generates approx 1 ms */
+void delay_ms(int delay_t){
+    int i=0, j=0;
+    for(i=0; i<delay_t; i++){
+/*
+        TR0 = 0;
+        TF0 = 0;
+        TMOD = 0x01;
+        TL0 =  0x89;
+        TH0 = 0xFC;
+        TR0 = 1;
+        while(!TF0);
+        TR0 = 0;
+        TF0 = 0;
+*/
+        for(j=0; j<121; j++);
+    }
+
+}
+
+
+unsigned char readlcddata(void){
     char c;
     P5->OUT |= BIT5; //Enable = 1
     Delayms(20);
@@ -56,7 +90,7 @@ char readlcddata(void){
     Return value: void
 */
 void lcdBusyWait(){
-char cmd;
+unsigned char cmd;
 P5->OUT &= ~BIT0; //RS = 0 //command
 P5->OUT |=  BIT1; //RW = 1 //read
 cmd = readlcddata();
@@ -71,6 +105,24 @@ while((cmd & 0x80) == 0x80){ //checking if BF is set
 
  }*/
 }
+
+
+
+/* checks for busy flag */
+void check_busy_flag(){
+    volatile unsigned char temp;
+    P5->OUT &= ~BIT0; //RS = 0 //command
+    P5->OUT |=  BIT1; //RW = 1 //read
+   // delay_ms(5);
+    //check_busy_flag();
+    do{
+    temp = readlcddata();
+    temp = temp & 0x80;
+    P5->OUT &= ~BIT5; //Enable = 0
+    }while(temp == 0x80);
+    P5->OUT &=~  BIT1; //RW = 1 //read
+}
+
 
 /*
     Name: putcommand()
@@ -163,10 +215,11 @@ unsigned char dataRead(void){
     Input: void
     Return Value: void
 */
-void lcdputch(char ch){
+void lcdputch(unsigned char ch){
     lcdBusyWait();
     P5->OUT |= BIT0; //RS = 1 //data
     P5->OUT &= ~BIT1; //RW = 0 //write
+    delay_ms(2);
     putdata(ch);
 }
 
@@ -185,6 +238,52 @@ void lcdgotoaddr(unsigned char addr){
     commandWrite(addr);
 }
 
+
+/* goto CGRAM address */
+void lcdgotocgramaddr(unsigned char addr){
+    addr = (addr<<3) | 0x40;
+   // check_busy_flag();
+    delay_ms(20);
+    P4->DIR = BIT0 | BIT1 | BIT2 | BIT3 | BIT4 | BIT5 | BIT6 | BIT7;
+    P4->OUT = addr;
+    P5->OUT &= ~BIT0; //RS = 0
+    P5->OUT &= ~BIT1; //RW = 0
+    P5->OUT |= BIT5; //Enable = 1
+    P5->OUT &= ~BIT5; //Enable = 0
+    Delayms(20);
+    Delayms(200);
+
+
+
+}
+
+
+
+/* Put custom character on LCD */
+void lcdputchcustom(unsigned char cc){
+   // check_busy_flag();
+    delay_ms(20);
+    P4->DIR = BIT0 | BIT1 | BIT2 | BIT3 | BIT4 | BIT5 | BIT6 | BIT7;
+    P4->OUT = cc;
+    P5->OUT |= BIT0; //RS = 0
+   // LCD_RW = 1;
+   // delay_ms(1);
+    P5->OUT &= ~BIT1; //RW = 0
+    delay_ms(2);
+    P5->OUT |= BIT5; //Enable = 1
+        Delayms(20);
+        P5->OUT &= ~BIT5; //Enable = 0
+  //  delay_us(5);
+    //check_busy_flag();
+   // if(cc != '\0' && cc != '\r' && cc!= '\n'){
+
+    Delayms(200);
+   // P5->OUT &= ~BIT5; //Enable = 0
+   // }
+
+}
+
+
 /*
     Name: lcdputstr()
     Description: Clears the LCD display and prints on the screen
@@ -194,7 +293,7 @@ void lcdgotoaddr(unsigned char addr){
 void lcdputstr(char *str, unsigned char addr) {
     unsigned int i = 0;
     int lineNumber = 1;
-    char c;
+    unsigned char c;
     lcdBusyWait();
     P5->OUT |= BIT0; //RS = 1 //data
     P5->OUT &= ~BIT1; //RW = 0 //write
@@ -431,4 +530,170 @@ void lcdinit(){
 	    //13. Cursor home
 	    commandWrite(0x02);
 
+}
+
+
+
+
+/* Create custom character */
+
+void lcdcreatechar(unsigned char ccode, unsigned char row_vals[], unsigned char lcd_addr){
+    unsigned char i, temp_addr=0;
+
+   // lcdgotoaddr(lcd_address);
+    //temp_addr = read_cursor_addr();
+    lcdgotocgramaddr(ccode);
+    for(i=0; i<8; i++){
+        lcdputchcustom(row_vals[i]);
+        delay_ms(2);
+    }
+
+//    lcdgotoaddr(lcd_address);
+
+    lcdgotoaddr(lcd_addr);
+    delay_ms(20);
+
+    lcdputchcustom(ccode);
+
+    lcdgotoaddr(0x00);
+   // lcd_address++;
+   // wrap_cursor(temp_addr);
+   // lcdputch(ccode);
+
+}
+
+
+
+void custom_char_play(unsigned char lcd_a){
+    unsigned char char_code;
+    unsigned char cgram_data[8];
+    char_code = 0;
+    cgram_data[0] = 0b11011;
+    cgram_data[1] = 0b11011;
+    cgram_data[2] = 0b11011;
+    cgram_data[3] = 0b11011;
+    cgram_data[4] = 0b11011;
+    cgram_data[5] = 0b11011;
+    cgram_data[6] = 0b11011;
+    cgram_data[7] = 0b11011;
+    lcdgotoaddr(lcd_a);
+    lcdcreatechar(char_code, cgram_data, lcd_a);
+}
+
+
+
+void custom_char_pause(unsigned char lcd_a){
+    unsigned char char_code;
+    unsigned char cgram_data[8];
+    char_code = 1;
+    cgram_data[0] = 0b10000;
+    cgram_data[1] = 0b11100;
+    cgram_data[2] = 0b11110;
+    cgram_data[3] = 0b11111;
+    cgram_data[4] = 0b11110;
+    cgram_data[5] = 0b11100;
+    cgram_data[6] = 0b11000;
+    cgram_data[7] = 0b10000;
+    lcdgotoaddr(lcd_a);
+    lcdcreatechar(char_code, cgram_data, lcd_a);
+}
+
+
+void custom_char_next(unsigned char lcd_a){
+    unsigned char char_code;
+    unsigned char cgram_data[8];
+    char_code = 2;
+    cgram_data[0] = 0b10001;
+    cgram_data[1] = 0b11101;
+    cgram_data[2] = 0b11101;
+    cgram_data[3] = 0b11111;
+    cgram_data[4] = 0b11111;
+    cgram_data[5] = 0b11101;
+    cgram_data[6] = 0b11001;
+    cgram_data[7] = 0b10001;
+    lcdgotoaddr(lcd_a);
+    lcdcreatechar(char_code, cgram_data, lcd_a);
+}
+
+
+void custom_char_prev(unsigned char lcd_a){
+    unsigned char char_code;
+    unsigned char cgram_data[8];
+    char_code = 3;
+    cgram_data[0] = 0b10001;
+    cgram_data[1] = 0b10111;
+    cgram_data[2] = 0b10111;
+    cgram_data[3] = 0b11111;
+    cgram_data[4] = 0b11111;
+    cgram_data[5] = 0b10111;
+    cgram_data[6] = 0b10011;
+    cgram_data[7] = 0b10001;
+    lcdgotoaddr(lcd_a);
+    lcdcreatechar(char_code, cgram_data, lcd_a);
+}
+
+
+void custom_char_shuffle_on(unsigned char lcd_a){
+    unsigned char char_code;
+    unsigned char cgram_data[8];
+    char_code = 4;
+    cgram_data[0] = 0b00000;
+    cgram_data[1] = 0b11011;
+    cgram_data[2] = 0b01010;
+    cgram_data[3] = 0b00100;
+    cgram_data[4] = 0b01010;
+    cgram_data[5] = 0b11011;
+    cgram_data[6] = 0b00000;
+    cgram_data[7] = 0b11111;
+    lcdgotoaddr(lcd_a);
+    lcdcreatechar(char_code, cgram_data, lcd_a);
+}
+
+
+void custom_char_shuffle_off(unsigned char lcd_a){
+    unsigned char char_code;
+    unsigned char cgram_data[8];
+    char_code = 5;
+    cgram_data[0] = 0b11111;
+    cgram_data[1] = 0b00000;
+    cgram_data[2] = 0b00000;
+    cgram_data[3] = 0b00000;
+    cgram_data[4] = 0b00000;
+    cgram_data[5] = 0b00000;
+    cgram_data[6] = 0b00000;
+    cgram_data[7] = 0b11111;
+    lcdgotoaddr(lcd_a);
+    lcdcreatechar(char_code, cgram_data, lcd_a);
+}
+
+void custom_char_loop(unsigned char lcd_a){
+    unsigned char char_code;
+    unsigned char cgram_data[8];
+    char_code = 6;
+    cgram_data[0] = 0b00010;
+    cgram_data[1] = 0b11111;
+    cgram_data[2] = 0b10010;
+    cgram_data[3] = 0b10001;
+    cgram_data[4] = 0b10001;
+    cgram_data[5] = 0b01001;
+    cgram_data[6] = 0b11111;
+    cgram_data[7] = 0b01000;
+    lcdgotoaddr(lcd_a);
+    lcdcreatechar(char_code, cgram_data, lcd_a);
+}
+
+void custom_char_loop_off(unsigned char lcd_a){
+    unsigned char char_code;
+    unsigned char cgram_data[8];
+    char_code = 7;
+    cgram_data[0] = 0b00010;
+    cgram_data[1] = 0b11111;
+    cgram_data[2] = 0b00010;
+    cgram_data[3] = 0b00000;
+    cgram_data[4] = 0b00000;
+    cgram_data[5] = 0b00010;
+    cgram_data[6] = 0b11111;
+    cgram_data[7] = 0b00010;
+    lcdgotoaddr(lcd_a);
+    lcdcreatechar(char_code, cgram_data, lcd_a);
 }
