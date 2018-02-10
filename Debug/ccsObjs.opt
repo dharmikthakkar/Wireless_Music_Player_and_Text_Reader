@@ -1,0 +1,1 @@
+"./main.o" "./startup_msp432p401m_gcc.o" "./system_msp432p401m.o" -Wl,-T"../msp432p401m.lds" -Wl,--start-group -lgcc -lnosys -lc -Wl,--end-group 
