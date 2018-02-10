@@ -3,37 +3,64 @@
 ################################################################################
 
 # Add inputs and outputs from these tool invocations to the build variables 
-LDS_SRCS += \
-../msp432p401m.lds 
+CMD_SRCS += \
+../driverlib_empty_project_ccs.cmd 
+
+LIB_SRCS += \
+C:/ti/msp/MSP432Ware_3_50_00_02/driverlib/driverlib/MSP432P4xx/ccs/msp432p4xx_driverlib.lib 
 
 C_SRCS += \
+../ff.c \
+../lcd.c \
 ../main.c \
-../startup_msp432p401m_gcc.c \
-../system_msp432p401m.c 
+../mmc_ssp.c \
+../player1063.c \
+../startup_msp432p401r_ccs.c \
+../system_msp432p401r.c 
 
 OBJS += \
-./main.o \
-./startup_msp432p401m_gcc.o \
-./system_msp432p401m.o 
+./ff.obj \
+./lcd.obj \
+./main.obj \
+./mmc_ssp.obj \
+./player1063.obj \
+./startup_msp432p401r_ccs.obj \
+./system_msp432p401r.obj 
 
 C_DEPS += \
+./ff.d \
+./lcd.d \
 ./main.d \
-./startup_msp432p401m_gcc.d \
-./system_msp432p401m.d 
+./mmc_ssp.d \
+./player1063.d \
+./startup_msp432p401r_ccs.d \
+./system_msp432p401r.d 
 
 C_DEPS__QUOTED += \
+"ff.d" \
+"lcd.d" \
 "main.d" \
-"startup_msp432p401m_gcc.d" \
-"system_msp432p401m.d" 
+"mmc_ssp.d" \
+"player1063.d" \
+"startup_msp432p401r_ccs.d" \
+"system_msp432p401r.d" 
 
 OBJS__QUOTED += \
-"main.o" \
-"startup_msp432p401m_gcc.o" \
-"system_msp432p401m.o" 
+"ff.obj" \
+"lcd.obj" \
+"main.obj" \
+"mmc_ssp.obj" \
+"player1063.obj" \
+"startup_msp432p401r_ccs.obj" \
+"system_msp432p401r.obj" 
 
 C_SRCS__QUOTED += \
+"../ff.c" \
+"../lcd.c" \
 "../main.c" \
-"../startup_msp432p401m_gcc.c" \
-"../system_msp432p401m.c" 
+"../mmc_ssp.c" \
+"../player1063.c" \
+"../startup_msp432p401r_ccs.c" \
+"../system_msp432p401r.c" 
 
 

@@ -4,25 +4,24 @@
 
 SHELL = cmd.exe
 
-CG_TOOL_ROOT := C:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_9-2015q3
+CG_TOOL_ROOT := C:/ti/ccsv6/tools/compiler/ti-cgt-arm_16.9.0.LTS
 
 GEN_OPTS__FLAG := 
 GEN_CMDS__FLAG := 
 
 ORDERED_OBJS += \
-"./main.o" \
-"./startup_msp432p401m_gcc.o" \
-"./system_msp432p401m.o" \
-"./fatfs/ff.o" \
-"./fatfs/option/syscall.o" \
-"./fatfs/option/unicode.o" \
--Wl,-T"../msp432p401m.lds" \
+"./ff.obj" \
+"./lcd.obj" \
+"./main.obj" \
+"./mmc_ssp.obj" \
+"./player1063.obj" \
+"./startup_msp432p401r_ccs.obj" \
+"./system_msp432p401r.obj" \
+"./option/cc932.obj" \
+"../driverlib_empty_project_ccs.cmd" \
+"C:/ti/msp/MSP432Ware_3_50_00_02/driverlib/driverlib/MSP432P4xx/ccs/msp432p4xx_driverlib.lib" \
 $(GEN_CMDS__FLAG) \
--Wl,--start-group \
--lgcc \
--lnosys \
--lc \
--Wl,--end-group \
+-llibc.a \
 
 -include ../makefile.init
 
@@ -32,11 +31,9 @@ RMDIR := RMDIR /S/Q
 # All of the sources participating in the build are defined here
 -include sources.mk
 -include subdir_vars.mk
--include fatfs/subdir_vars.mk
--include fatfs/option/subdir_vars.mk
+-include option/subdir_vars.mk
 -include subdir_rules.mk
--include fatfs/subdir_rules.mk
--include fatfs/option/subdir_rules.mk
+-include option/subdir_rules.mk
 -include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)
@@ -133,45 +130,52 @@ endif
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXE_OUTPUTS += \
-SDController.out \
+driverlib_empty_project.out \
 
 EXE_OUTPUTS__QUOTED += \
-"SDController.out" \
+"driverlib_empty_project.out" \
 
 BIN_OUTPUTS += \
-SDController.hex \
+driverlib_empty_project.bin \
 
 BIN_OUTPUTS__QUOTED += \
-"SDController.hex" \
+"driverlib_empty_project.bin" \
 
 
 # All Target
-all: SDController.out
+all: $(OBJS) $(CMD_SRCS) $(LIB_SRCS) $(GEN_CMDS)
+	@$(MAKE) --no-print-directory -Onone "driverlib_empty_project.out"
 
 # Tool invocations
-SDController.out: $(OBJS) $(LDS_SRCS) $(GEN_CMDS)
+driverlib_empty_project.out: $(OBJS) $(CMD_SRCS) $(LIB_SRCS) $(GEN_CMDS)
 	@echo 'Building target: $@'
-	@echo 'Invoking: GNU Linker'
-	"C:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_9-2015q3/bin/arm-none-eabi-gcc.exe" -mcpu=cortex-m4 -march=armv7e-m -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -D__MSP432P401M__ -DTARGET_IS_FALCON -Dgcc -g -gdwarf-3 -gstrict-dwarf -Wall -Wl,-Map,"SDController.map" -mthumb -g -gstrict-dwarf -Wall -o"SDController.out" $(ORDERED_OBJS)
+	@echo 'Invoking: MSP432 Linker'
+	"C:/ti/ccsv6/tools/compiler/ti-cgt-arm_16.9.0.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=FPv4SPD16 -me --advice:power=all --define=__MSP432P401R__ --define=TARGET_IS_MSP432P4XX --define=ccs -g --gcc --diag_warning=225 --diag_wrap=off --display_error_number -z -m"driverlib_empty_project.map" --stack_size=512 -i"C:/ti/ccsv6/tools/compiler/ti-cgt-arm_16.9.0.LTS/lib" -i"C:/ti/ccsv6/tools/compiler/ti-cgt-arm_16.9.0.LTS/include" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="driverlib_empty_project_linkInfo.xml" --rom_model -o "driverlib_empty_project.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: $@'
 	@echo ' '
+	@$(MAKE) --no-print-directory post-build
 
-SDController.hex: $(EXE_OUTPUTS)
-	@echo 'Invoking: GNU Objcopy Utility'
-	"C:/ti/ccsv6/tools/compiler/gcc-arm-none-eabi-4_9-2015q3/bin/arm-none-eabi-objcopy.exe"  $(EXE_OUTPUTS__QUOTED) "SDController.hex"
+driverlib_empty_project.bin: $(EXE_OUTPUTS)
+	@echo 'Invoking: MSP432 Hex Utility'
+	"C:/ti/ccsv6/tools/compiler/ti-cgt-arm_16.9.0.LTS/bin/armhex"  -o "driverlib_empty_project.bin" $(EXE_OUTPUTS__QUOTED)
 	@echo 'Finished building: $@'
 	@echo ' '
+	@$(MAKE) --no-print-directory post-build
 
 # Other Targets
 clean:
 	-$(RM) $(EXE_OUTPUTS__QUOTED)$(BIN_OUTPUTS__QUOTED)
-	-$(RM) "main.d" "startup_msp432p401m_gcc.d" "system_msp432p401m.d" "fatfs\ff.d" "fatfs\option\syscall.d" "fatfs\option\unicode.d" 
-	-$(RM) "main.o" "startup_msp432p401m_gcc.o" "system_msp432p401m.o" "fatfs\ff.o" "fatfs\option\syscall.o" "fatfs\option\unicode.o" 
+	-$(RM) "ff.d" "lcd.d" "main.d" "mmc_ssp.d" "player1063.d" "startup_msp432p401r_ccs.d" "system_msp432p401r.d" "option\cc932.d" 
+	-$(RM) "ff.obj" "lcd.obj" "main.obj" "mmc_ssp.obj" "player1063.obj" "startup_msp432p401r_ccs.obj" "system_msp432p401r.obj" "option\cc932.obj" 
 	-@echo 'Finished clean'
 	-@echo ' '
 
+post-build:
+	-C:/ti/ccsv6/utils/tiobj2bin/tiobj2bin driverlib_empty_project.out driverlib_empty_project.bin C:/ti/ccsv6/tools/compiler/ti-cgt-arm_16.9.0.LTS/bin/armofd C:/ti/ccsv6/tools/compiler/ti-cgt-arm_16.9.0.LTS/bin/armhex C:/ti/ccsv6/utils/tiobj2bin/mkhex4bin
+	-@echo ' '
+
 .PHONY: all clean dependents
-.SECONDARY:
+.SECONDARY: post-build
 
 -include ../makefile.targets
 
