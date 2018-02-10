@@ -74,7 +74,7 @@
 #include "vs1063_uc.h"
 #include "player.h"
 
-#define VOL_DIFF 500;
+#define VOL_DIFF 0x500;
 
 /*LCD includes*/
 #include "lcd.h"
@@ -111,8 +111,8 @@ volatile unsigned int start_flag = 0;
 uint16_t received_option = 0x00;
 int ta_error = 0;
 int k =0;
-unsigned char current_volume = 0x2424;
-char vol_level[3]; //volume level
+uint16_t current_volume = 0x2424;
+char vol_level[6]; //volume level
 
 /*LCD read variables*/
 int read_mode = 0; //when read_mode is 1, user is reading a file.
@@ -136,8 +136,7 @@ WORD AccFiles, AccDirs;
 FILINFO Finfo;
 
 char Line[256];             /* Console input buffer */
-BYTE Buff[20] __attribute__ ((aligned (4))) ;    /* Working buffer */
-BYTE Buff2[1024] __attribute__ ((aligned (4))) ;    /* Working buffer */
+BYTE Buff2[130] __attribute__ ((aligned (4))) ;    /* Working buffer */
 
 FATFS FatFs;                /* File system object for each logical drive */
 FIL File[2];                /* File objects */
@@ -291,29 +290,28 @@ uint16_t decode(){
 }
 
 void getvolumerange(){
+	vol_level[0] = 'V';
+	vol_level[1] = 'O';
+	vol_level[2] = 'L';
+	vol_level[3] = ':';
+	vol_level[5] = '\0';
 	if(current_volume >= 0x0000 && current_volume <= 0x1000){
-		vol_level[0] = '6';
-		vol_level[1] = '\0';
+		vol_level[4] = '6';
 	}
 	else if(current_volume > 0x1000 && current_volume <= 0x2000){
-		vol_level[0] = '5';
-		vol_level[1] = '\0';
+		vol_level[4] = '5';
 	}
 	else if(current_volume > 0x2000 && current_volume <= 0x3000){
-		vol_level[0] = '4';
-		vol_level[1] = '\0';
+		vol_level[4] = '4';
 	}
 	else if(current_volume > 0x3000 && current_volume <= 0x4000){
-		vol_level[0] = '3';
-		vol_level[1] = '\0';
+		vol_level[4] = '3';
 	}
 	else if(current_volume > 0x4000 && current_volume <= 0x5000){
-		vol_level[0] = '2';
-		vol_level[1] = '\0';
+		vol_level[4] = '2';
 	}
 	else{
-		vol_level[0] = '1';
-		vol_level[1] = '\0';
+		vol_level[4] = '1';
 	}
 }
 
@@ -359,6 +357,26 @@ int playmusic(int option){
 				                    			 			   }
 				                    			 			   else is_paused = 1;
 				                    			  }
+				                    			 else if(received_option == 0x00FF){
+				                    				 //decrease the volume
+				                    				 P3->OUT &= ~ BIT2;
+				                    				 current_volume = current_volume + VOL_DIFF;
+				                    				 getvolumerange();
+				                    				 lcdputstr(vol_level,0x1A);
+				                    				 WriteSci(SCI_VOL, current_volume);
+				                    				 P3->OUT |=  BIT2;
+				                    				 break;
+				                    			 }
+				                    			 else if(received_option == 0xA05F){
+				                    				 //increase the volume
+				                    				 P3->OUT &= ~ BIT2;
+				                    				 current_volume = current_volume - VOL_DIFF;
+				                    				 getvolumerange();
+				                    				 lcdputstr(vol_level,0x1A);
+				                    				 WriteSci(SCI_VOL, current_volume);
+				                    				 P3->OUT |=  BIT2;
+				                    				 break;
+				                    			 }
 				                    		 }
 				                    		 else{
 				                    			 break;
@@ -388,7 +406,7 @@ int main(void)
     signed int error_flag = 0;
     long p1, p2, p3;
     BYTE res, b, drv = 0;
-    UINT s1, s2, cnt, blen = sizeof Buff;
+    UINT s1, s2, cnt;
     static const BYTE ft[] = {0, 12, 16, 32};
     DWORD ofs = 0, sect = 0, blk[2];
     FATFS *fs;
@@ -542,7 +560,7 @@ int main(void)
 			  if(music_mode == 1){
 				   lcdputstr("Playing next song...", 0x00);
 				   			   music_mode = 1;
-				   			   if(current_music_option >=3){
+				   			   if(current_music_option >=2){
 				   				   current_music_option = 0;
 				   			   }
 				   			   else{
@@ -551,6 +569,21 @@ int main(void)
 				   			   playmusic(current_music_option);
 
 			   }
+		   }//end of else if
+		   else if(received_option == 0x10EF){
+		   			   //play next
+		   			  if(music_mode == 1){
+		   				   lcdputstr("Playing previous song...", 0x00);
+		   				   			   music_mode = 1;
+		   				   			   if(current_music_option <=0){
+		   				   				   current_music_option = 2;
+		   				   			   }
+		   				   			   else{
+		   				   				   current_music_option--;
+		   				   			   }
+		   				   			   playmusic(current_music_option);
+
+		   			   }
 		   }//end of else if
 		   else if(received_option == 0x20DF){
 			   if(is_paused) is_paused = 0;
